@@ -1,0 +1,504 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import MainLayout from '@/layouts/MainLayout.vue'
+import { servicesApi, categoriesApi } from '@/services/api'
+import type { Service, ServiceCategory } from '@/types'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const services = ref<Service[]>([])
+const categories = ref<ServiceCategory[]>([])
+const selectedCategory = ref<number | null>(null)
+const searchQuery = ref('')
+const loading = ref(false)
+
+onMounted(async () => {
+  await loadData()
+})
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const [servicesResponse, categoriesResponse] = await Promise.all([
+      servicesApi.getAll(),
+      categoriesApi.getAll()
+    ])
+    services.value = servicesResponse.data
+    categories.value = categoriesResponse.data
+  } catch (error) {
+    console.error('Error loading data:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredServices = () => {
+  let filtered = services.value
+
+  if (selectedCategory.value) {
+    filtered = filtered.filter((s) => s.categoryId === selectedCategory.value)
+  }
+
+  if (searchQuery.value) {
+    filtered = filtered.filter((s) =>
+      s.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  }
+
+  return filtered
+}
+
+const selectCategory = (categoryId: number | null) => {
+  selectedCategory.value = categoryId
+}
+
+const goToService = (serviceId: number) => {
+  router.push(`/service/${serviceId}`)
+}
+
+const goToJoinFamily = () => {
+  router.push('/groups/join')
+}
+</script>
+<template>
+  <MainLayout>
+    <div class="home-view">
+      <section class="hero-section">
+        <div class="hero-container">
+          <div class="hero-content">
+            <h1>Делите подписки</h1>
+            <p>Экономьте на тарифах и сервисах вместе с друзьями</p>
+            <button class="hero-btn" @click="goToJoinFamily">
+              <i class="pi pi-users"></i>
+              <span>Вступить в семью</span>
+              <i class="pi pi-arrow-right"></i>
+            </button>
+          </div>
+          <div class="hero-image">
+            <div class="floating-card">
+              <i class="pi pi-dollar" style="font-size: 3rem; color: #dc2626"></i>
+              <h3>Экономия до 75%</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="content-container">
+          <div class="search-filters">
+            <div class="search-bar">
+              <i class="pi pi-search"></i>
+              <input v-model="searchQuery" type="text" placeholder="Поиск сервиса..." />
+            </div>
+
+            <div class="category-filters">
+              <button
+                class="filter-btn"
+                :class="{ active: selectedCategory === null }"
+                @click="selectCategory(null)"
+              >
+                <i class="pi pi-th-large"></i>
+                <span>Все</span>
+              </button>
+              <button
+                v-for="category in categories"
+                :key="category.id"
+                class="filter-btn"
+                :class="{ active: selectedCategory === category.id }"
+                @click="selectCategory(category.id)"
+              >
+                <img
+                  v-if="category.icon"
+                  :src="category.icon"
+                  :alt="category.name"
+                  class="category-icon-img"
+                />
+                <span>{{ category.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="loading" class="loading">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          </div>
+
+          <div v-else class="services-grid">
+            <div
+              v-for="service in filteredServices()"
+              :key="service.id"
+              class="service-card"
+              @click="goToService(service.id!)"
+            >
+              <div class="service-icon">
+                <img
+                  v-if="service.icon"
+                  :src="service.icon"
+                  :alt="service.name"
+                  class="service-logo"
+                />
+              </div>
+              <div class="service-info">
+                <h3>{{ service.name }}</h3>
+                <p>{{ service.planCount || 0 }} тарифов</p>
+              </div>
+              <button class="service-arrow">
+                <i class="pi pi-arrow-right"></i>
+              </button>
+            </div>
+
+            <div v-if="filteredServices().length === 0" class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: #9ca3af"></i>
+              <p>Сервисы не найдены</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </MainLayout>
+</template>
+<style scoped>
+.home-view {
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  background: #dc2626;
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 1;
+  line-height: 1.6;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  color: #dc2626;
+  border: none;
+  padding: 1.25rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.hero-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  background: #fef2f2;
+}
+
+.hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.floating-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+.floating-card h3 {
+  color: #1f2937;
+  font-size: 1.5rem;
+  margin-top: 1rem;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Content Section */
+.content-section {
+  padding: 3rem 2rem;
+  background: #f9fafb;
+}
+
+.content-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Search and Filters */
+.search-filters {
+  margin-bottom: 3rem;
+}
+
+.search-bar {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.search-bar i {
+  color: #6b7280;
+  font-size: 1.25rem;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.search-bar input::placeholder {
+  color: #9ca3af;
+}
+
+.category-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.filter-btn.active {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.category-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+  color: #dc2626;
+}
+
+/* Services Grid */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.service-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
+  border-color: #dc2626;
+}
+
+.service-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: white;
+  overflow: hidden;
+}
+
+.service-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.75rem;
+}
+
+.service-info h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.service-info p {
+  font-size: 0.95rem;
+  color: #dc2626;
+  font-weight: 600;
+  background: #fef2f2;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+}
+
+.service-arrow {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: none;
+  color: #dc2626;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.service-card:hover .service-arrow {
+  opacity: 1;
+  background: #dc2626;
+  color: white;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 0;
+  color: #9ca3af;
+}
+
+.empty-state p {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-image {
+    display: none;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .content-section {
+    padding: 2rem 1rem;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
