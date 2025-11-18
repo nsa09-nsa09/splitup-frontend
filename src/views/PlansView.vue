@@ -327,27 +327,36 @@ onMounted(() => {
 <style scoped>
 .card {
   background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #f3f4f6;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .form-field {
@@ -370,8 +379,10 @@ onMounted(() => {
 
 .form-field label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  margin-bottom: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9375rem;
 }
 
 .w-full {
@@ -384,5 +395,74 @@ onMounted(() => {
 
 .text-gray-400 {
   color: #9ca3af;
+}
+
+:deep(.p-datatable) {
+  font-size: 1rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  color: #111827;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: #f9fafb;
+}
+
+:deep(.p-button) {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+}
+
+:deep(.p-button-sm) {
+  padding: 0.625rem 1rem;
+  font-size: 0.9375rem;
+}
+
+:deep(.p-button:not(.p-button-text)) {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+:deep(.p-button:not(.p-button-text):hover) {
+  background: #15803d;
+  border-color: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+:deep(.p-paginator) {
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+:deep(.p-inputtext),
+:deep(.p-inputnumber-input),
+:deep(.p-dropdown),
+:deep(.p-textarea) {
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+:deep(.p-inputtext:focus),
+:deep(.p-inputnumber-input:focus),
+:deep(.p-dropdown:focus),
+:deep(.p-textarea:focus) {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 </style>

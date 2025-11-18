@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
@@ -9,24 +9,139 @@ const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
 
+// Загрузка сохранённого состояния из sessionStorage
+const loadSavedState = () => {
+  const savedStep = sessionStorage.getItem('registerStep')
+  const savedEmail = sessionStorage.getItem('registerEmail')
+  const savedCode = sessionStorage.getItem('registerCode')
+
+  return {
+    step: savedStep ? parseInt(savedStep) : 1,
+    email: savedEmail || '',
+    code: savedCode || ''
+  }
+}
+
+const savedState = loadSavedState()
+
+// Шаги регистрации: 1 - email, 2 - код, 3 - данные
+const step = ref(savedState.step)
+
+const email = ref(savedState.email)
+const code = ref(savedState.code)
 const formData = ref({
   username: '',
-  email: '',
   password: '',
   confirmPassword: ''
 })
 
 const loading = ref(false)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
-const validateForm = () => {
-  if (!formData.value.username || !formData.value.email || !formData.value.password) {
+// Сохранение состояния при изменении
+watch([step, email, code], () => {
+  sessionStorage.setItem('registerStep', step.value.toString())
+  sessionStorage.setItem('registerEmail', email.value)
+  sessionStorage.setItem('registerCode', code.value)
+})
+
+// Очистка состояния при успешной регистрации
+const clearRegistrationState = () => {
+  sessionStorage.removeItem('registerStep')
+  sessionStorage.removeItem('registerEmail')
+  sessionStorage.removeItem('registerCode')
+}
+
+onMounted(() => {
+  // Если пользователь уже авторизован, перенаправить на главную
+  if (authStore.isAuthenticated) {
+    router.push('/')
+  }
+})
+
+// Шаг 1: Отправить код на email
+const sendCode = async () => {
+  if (!email.value) {
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: 'Введите email',
+      life: 3000
+    })
+    return
+  }
+
+  loading.value = true
+  try {
+    await authStore.sendVerificationCode(email.value)
+
+    toast.add({
+      severity: 'success',
+      summary: 'Успешно',
+      detail: 'Код отправлен на вашу почту',
+      life: 3000
+    })
+
+    step.value = 2
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: error.response?.data?.message || 'Ошибка отправки кода',
+      life: 3000
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+// Шаг 2: Проверить код
+const verifyCode = async () => {
+  if (code.value.length !== 6) {
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: 'Код должен содержать 6 цифр',
+      life: 3000
+    })
+    return
+  }
+
+  loading.value = true
+  try {
+    await authStore.checkVerificationCode(email.value, code.value)
+
+    toast.add({
+      severity: 'success',
+      summary: 'Успешно',
+      detail: 'Код подтвержден',
+      life: 3000
+    })
+
+    step.value = 3
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: error.response?.data?.message || 'Неверный код',
+      life: 3000
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+// Шаг 3: Создать пользователя
+const completeRegistration = async () => {
+  if (!formData.value.username || !formData.value.password) {
     toast.add({
       severity: 'error',
       summary: 'Ошибка',
       detail: 'Заполните все обязательные поля',
       life: 3000
     })
-    return false
+    return
   }
 
   if (formData.value.password !== formData.value.confirmPassword) {
@@ -36,7 +151,7 @@ const validateForm = () => {
       detail: 'Пароли не совпадают',
       life: 3000
     })
-    return false
+    return
   }
 
   if (formData.value.password.length < 6) {
@@ -46,31 +161,29 @@ const validateForm = () => {
       detail: 'Пароль должен содержать минимум 6 символов',
       life: 3000
     })
-    return false
+    return
   }
-
-  return true
-}
-
-const handleRegister = async () => {
-  if (!validateForm()) return
 
   loading.value = true
   try {
-    await authStore.register({
+    await authStore.completeRegistration({
+      email: email.value,
+      code: code.value,
       username: formData.value.username,
-      email: formData.value.email,
       password: formData.value.password
     })
 
     toast.add({
       severity: 'success',
       summary: 'Успешно',
-      detail: 'Код подтверждения отправлен на вашу почту',
+      detail: 'Регистрация завершена!',
       life: 3000
     })
 
-    router.push({ name: 'verify', query: { email: formData.value.email } })
+    // Очистить сохранённое состояние
+    clearRegistrationState()
+
+    router.push('/')
   } catch (error: any) {
     toast.add({
       severity: 'error',
@@ -83,8 +196,21 @@ const handleRegister = async () => {
   }
 }
 
+const handleCodeInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  code.value = input.value.replace(/\D/g, '').slice(0, 6)
+}
+
 const goToLogin = () => {
+  // Очистить состояние при переходе на логин
+  clearRegistrationState()
   router.push({ name: 'login' })
+}
+
+const goBack = () => {
+  if (step.value > 1) {
+    step.value--
+  }
 }
 </script>
 
@@ -93,68 +219,176 @@ const goToLogin = () => {
     <div class="register-view">
       <div class="register-container">
         <div class="register-card">
-          <div class="card-header">
-            <h1>Регистрация</h1>
-            <p>Создайте аккаунт BolipTole</p>
+          <!-- Шаг 1: Ввод email -->
+          <div v-if="step === 1">
+            <div class="card-header">
+              <div class="icon-wrapper">
+                <i class="pi pi-envelope" style="font-size: 3rem; color: #16a34a"></i>
+              </div>
+              <h1>Регистрация</h1>
+              <p>Введите ваш email для начала</p>
+            </div>
+
+            <form @submit.prevent="sendCode" class="register-form">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  required
+                  placeholder="example@mail.com"
+                  autofocus
+                />
+              </div>
+
+              <button type="submit" class="btn-register" :disabled="loading">
+                <i v-if="loading" class="pi pi-spin pi-spinner"></i>
+                <span v-else>Отправить код</span>
+              </button>
+
+              <div class="form-footer">
+                <p>
+                  Уже есть аккаунт?
+                  <a @click="goToLogin" class="link">Войти</a>
+                </p>
+              </div>
+            </form>
           </div>
 
-          <form @submit.prevent="handleRegister" class="register-form">
-            <div class="form-group">
-              <label for="username">Имя пользователя *</label>
-              <input
-                id="username"
-                v-model="formData.username"
-                type="text"
-                required
-                placeholder="Введите имя пользователя"
-              />
+          <!-- Шаг 2: Ввод кода -->
+          <div v-if="step === 2">
+            <div class="card-header">
+              <div class="icon-wrapper">
+                <i class="pi pi-shield" style="font-size: 3rem; color: #16a34a"></i>
+              </div>
+              <h1>Подтверждение</h1>
+              <p>Введите 6-значный код</p>
+              <p class="email-hint">отправленный на {{ email }}</p>
             </div>
 
-            <div class="form-group">
-              <label for="email">Email *</label>
-              <input
-                id="email"
-                v-model="formData.email"
-                type="email"
-                required
-                placeholder="example@mail.com"
-              />
+            <form @submit.prevent="verifyCode" class="register-form">
+              <div class="form-group">
+                <label for="code">Код подтверждения</label>
+                <input
+                  id="code"
+                  :value="code"
+                  @input="handleCodeInput"
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="6"
+                  required
+                  placeholder="000000"
+                  class="code-input"
+                  autofocus
+                />
+              </div>
+
+              <button type="submit" class="btn-register" :disabled="loading || code.length !== 6">
+                <i v-if="loading" class="pi pi-spin pi-spinner"></i>
+                <span v-else>Проверить код</span>
+              </button>
+
+              <button type="button" class="btn-back" @click="goBack">
+                <i class="pi pi-arrow-left"></i>
+                Назад
+              </button>
+            </form>
+          </div>
+
+          <!-- Шаг 3: Ввод данных -->
+          <div v-if="step === 3">
+            <div class="card-header">
+              <div class="icon-wrapper">
+                <i class="pi pi-user" style="font-size: 3rem; color: #16a34a"></i>
+              </div>
+              <h1>Завершение регистрации</h1>
+              <p>Заполните данные профиля</p>
             </div>
 
-            <div class="form-group">
-              <label for="password">Пароль *</label>
-              <input
-                id="password"
-                v-model="formData.password"
-                type="password"
-                required
-                placeholder="Минимум 6 символов"
-              />
-            </div>
+            <form @submit.prevent="completeRegistration" class="register-form">
+              <div class="form-group">
+                <label for="username">Имя пользователя *</label>
+                <input
+                  id="username"
+                  v-model="formData.username"
+                  type="text"
+                  required
+                  placeholder="Введите имя пользователя"
+                  autofocus
+                />
+              </div>
 
-            <div class="form-group">
-              <label for="confirmPassword">Подтвердите пароль *</label>
-              <input
-                id="confirmPassword"
-                v-model="formData.confirmPassword"
-                type="password"
-                required
-                placeholder="Повторите пароль"
-              />
-            </div>
+              <div class="form-group">
+                <label for="password">Пароль *</label>
+                <div class="password-input-wrapper">
+                  <input
+                    id="password"
+                    v-model="formData.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    required
+                    placeholder="Минимум 6 символов"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    @click="showPassword = !showPassword"
+                  >
+                    <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                  </button>
+                </div>
+              </div>
 
-            <button type="submit" class="btn-register" :disabled="loading">
-              <i v-if="loading" class="pi pi-spin pi-spinner"></i>
-              <span v-else>Зарегистрироваться</span>
-            </button>
+              <div class="form-group">
+                <label for="confirmPassword">Подтвердите пароль *</label>
+                <div class="password-input-wrapper">
+                  <input
+                    id="confirmPassword"
+                    v-model="formData.confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    required
+                    placeholder="Повторите пароль"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                  >
+                    <i :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                  </button>
+                </div>
+              </div>
 
-            <div class="form-footer">
-              <p>
-                Уже есть аккаунт?
-                <a @click="goToLogin" class="link">Войти</a>
-              </p>
-            </div>
-          </form>
+              <button type="submit" class="btn-register" :disabled="loading">
+                <i v-if="loading" class="pi pi-spin pi-spinner"></i>
+                <span v-else>Завершить регистрацию</span>
+              </button>
+
+              <button type="button" class="btn-back" @click="goBack">
+                <i class="pi pi-arrow-left"></i>
+                Назад
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Progress indicator -->
+        <div class="progress-indicator">
+          <div class="step" :class="{ active: step >= 1, completed: step > 1 }">
+            <div class="step-circle">1</div>
+            <span>Email</span>
+          </div>
+          <div class="step-line" :class="{ active: step > 1 }"></div>
+          <div class="step" :class="{ active: step >= 2, completed: step > 2 }">
+            <div class="step-circle">2</div>
+            <span>Код</span>
+          </div>
+          <div class="step-line" :class="{ active: step > 2 }"></div>
+          <div class="step" :class="{ active: step >= 3 }">
+            <div class="step-circle">3</div>
+            <span>Данные</span>
+          </div>
         </div>
       </div>
     </div>
@@ -182,11 +416,23 @@ const goToLogin = () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
   padding: 3rem;
+  margin-bottom: 2rem;
 }
 
 .card-header {
   text-align: center;
   margin-bottom: 2rem;
+}
+
+.icon-wrapper {
+  background: #f0fdf4;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
 }
 
 .card-header h1 {
@@ -199,6 +445,13 @@ const goToLogin = () => {
 .card-header p {
   color: #6b7280;
   font-size: 1rem;
+}
+
+.email-hint {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .register-form {
@@ -239,6 +492,47 @@ const goToLogin = () => {
   color: #9ca3af;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #16a34a;
+}
+
+.toggle-password i {
+  font-size: 1.125rem;
+}
+
+.code-input {
+  text-align: center;
+  letter-spacing: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
 .btn-register {
   background: #16a34a;
   color: white;
@@ -261,6 +555,27 @@ const goToLogin = () => {
 .btn-register:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-back {
+  background: transparent;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-back:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
 }
 
 .form-footer {
@@ -286,6 +601,77 @@ const goToLogin = () => {
   text-decoration: underline;
 }
 
+/* Progress Indicator */
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step.completed .step-circle {
+  background: #16a34a;
+  color: white;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-circle {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 2px solid #16a34a;
+}
+
+.step span {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.step.active span {
+  color: #16a34a;
+}
+
+.step-line {
+  width: 60px;
+  height: 2px;
+  background: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.step-line.active {
+  background: #16a34a;
+}
+
 @media (max-width: 640px) {
   .register-card {
     padding: 2rem 1.5rem;
@@ -293,6 +679,18 @@ const goToLogin = () => {
 
   .card-header h1 {
     font-size: 1.5rem;
+  }
+
+  .progress-indicator {
+    padding: 1rem;
+  }
+
+  .step span {
+    font-size: 0.75rem;
+  }
+
+  .step-line {
+    width: 40px;
   }
 }
 </style>

@@ -51,6 +51,37 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Шаг 1: Отправить код на email
+  async function sendVerificationCode(email: string) {
+    const response = await axios.post('http://localhost:8080/api/auth/send-code', { email })
+    return response.data
+  }
+
+  // Шаг 2: Проверить код
+  async function checkVerificationCode(email: string, code: string) {
+    const response = await axios.post('http://localhost:8080/api/auth/check-code', {
+      email,
+      code
+    })
+    return response.data
+  }
+
+  // Шаг 3: Завершить регистрацию
+  async function completeRegistration(data: {
+    email: string
+    code: string
+    username: string
+    password: string
+  }) {
+    const response = await axios.post<AuthResponse>(
+      'http://localhost:8080/api/auth/complete-registration',
+      data
+    )
+    setAuth(response.data)
+    return response.data
+  }
+
+  // Старый метод регистрации (для совместимости)
   async function register(data: {
     username: string
     email: string
@@ -60,6 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     return response.data
   }
 
+  // Старый метод верификации (для совместимости)
   async function verify(email: string, code: string) {
     const response = await axios.post<AuthResponse>(
       'http://localhost:8080/api/auth/verify',
@@ -92,6 +124,9 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isManager,
     canAccessAdmin,
+    sendVerificationCode,
+    checkVerificationCode,
+    completeRegistration,
     register,
     verify,
     login,
