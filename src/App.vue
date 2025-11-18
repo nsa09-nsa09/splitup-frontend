@@ -28,7 +28,7 @@ const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #ffffff;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
   min-height: 100vh;
 }
 
@@ -36,7 +36,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
 }
 
 .app-content {

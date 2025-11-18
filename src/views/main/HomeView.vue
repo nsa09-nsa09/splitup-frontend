@@ -76,7 +76,7 @@ const goToJoinFamily = () => {
           </div>
           <div class="hero-image">
             <div class="floating-card">
-              <i class="pi pi-dollar" style="font-size: 3rem; color: #dc2626"></i>
+              <i class="pi pi-dollar" style="font-size: 3rem; color: #16a34a"></i>
               <h3>Экономия до 75%</h3>
             </div>
           </div>
@@ -163,7 +163,7 @@ const goToJoinFamily = () => {
 
 /* Hero Section */
 .hero-section {
-  background: #dc2626;
+  background: #16a34a;
   color: white;
   padding: 4rem 2rem;
   position: relative;
@@ -213,7 +213,7 @@ const goToJoinFamily = () => {
   align-items: center;
   gap: 0.75rem;
   background: white;
-  color: #dc2626;
+  color: #16a34a;
   border: none;
   padding: 1.25rem 2.5rem;
   border-radius: 12px;
@@ -227,7 +227,7 @@ const goToJoinFamily = () => {
 .hero-btn:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-  background: #fef2f2;
+  background: #f0fdf4;
 }
 
 .hero-image {
@@ -292,8 +292,8 @@ const goToJoinFamily = () => {
 }
 
 .search-bar:focus-within {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .search-bar i {
@@ -335,17 +335,17 @@ const goToJoinFamily = () => {
 }
 
 .filter-btn:hover {
-  border-color: #dc2626;
-  color: #dc2626;
+  border-color: #16a34a;
+  color: #16a34a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 }
 
 .filter-btn.active {
-  background: #dc2626;
+  background: #16a34a;
   color: white;
-  border-color: #dc2626;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  border-color: #16a34a;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
 .category-icon-img {
@@ -359,7 +359,7 @@ const goToJoinFamily = () => {
   display: flex;
   justify-content: center;
   padding: 4rem 0;
-  color: #dc2626;
+  color: #16a34a;
 }
 
 /* Services Grid */
@@ -386,8 +386,8 @@ const goToJoinFamily = () => {
 
 .service-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
-  border-color: #dc2626;
+  box-shadow: 0 10px 25px rgba(22, 163, 74, 0.15);
+  border-color: #16a34a;
 }
 
 .service-icon {
@@ -419,9 +419,9 @@ const goToJoinFamily = () => {
 
 .service-info p {
   font-size: 0.95rem;
-  color: #dc2626;
+  color: #16a34a;
   font-weight: 600;
-  background: #fef2f2;
+  background: #f0fdf4;
   padding: 0.35rem 0.75rem;
   border-radius: 6px;
 }
@@ -433,9 +433,9 @@ const goToJoinFamily = () => {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #fef2f2;
+  background: #f0fdf4;
   border: none;
-  color: #dc2626;
+  color: #16a34a;
   font-size: 0.875rem;
   cursor: pointer;
   display: flex;
@@ -447,9 +447,9 @@ const goToJoinFamily = () => {
 
 .service-card:hover .service-arrow {
   opacity: 1;
-  background: #dc2626;
+  background: #16a34a;
   color: white;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
 .empty-state {
