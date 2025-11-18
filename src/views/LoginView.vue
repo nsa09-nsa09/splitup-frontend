@@ -15,6 +15,7 @@ const formData = ref({
 })
 
 const loading = ref(false)
+const showPassword = ref(false)
 
 const handleLogin = async () => {
   if (!formData.value.email || !formData.value.password) {
@@ -80,13 +81,22 @@ const goToRegister = () => {
 
             <div class="form-group">
               <label for="password">Пароль</label>
-              <input
-                id="password"
-                v-model="formData.password"
-                type="password"
-                required
-                placeholder="Введите пароль"
-              />
+              <div class="password-input-wrapper">
+                <input
+                  id="password"
+                  v-model="formData.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  placeholder="Введите пароль"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  @click="showPassword = !showPassword"
+                >
+                  <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn-login" :disabled="loading">
@@ -183,6 +193,39 @@ const goToRegister = () => {
 
 .form-group input::placeholder {
   color: #9ca3af;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #16a34a;
+}
+
+.toggle-password i {
+  font-size: 1.125rem;
 }
 
 .btn-login {
