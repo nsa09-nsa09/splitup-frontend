@@ -7,6 +7,12 @@ const route = useRoute()
 
 const menuItems = [
   {
+    label: 'Типы категорий',
+    icon: 'pi pi-th-large',
+    to: '/admin/category-types',
+    command: () => router.push('/admin/category-types')
+  },
+  {
     label: 'Категории',
     icon: 'pi pi-list',
     to: '/admin/categories',

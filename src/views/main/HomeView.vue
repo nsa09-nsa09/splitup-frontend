@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import MainLayout from '@/layouts/MainLayout.vue'
-import { servicesApi, categoriesApi } from '@/services/api'
-import type { Service, ServiceCategory } from '@/types'
+import { servicesApi, categoryTypesApi, categoriesApi } from '@/services/api'
+import type { Service, CategoryType, ServiceCategory } from '@/types'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const services = ref<Service[]>([])
+const categoryTypes = ref<CategoryType[]>([])
 const categories = ref<ServiceCategory[]>([])
-const selectedCategory = ref<number | null>(null)
+const selectedTypeId = ref<number | null>(null)
 const searchQuery = ref('')
 const loading = ref(false)
+const loadingCategories = ref(false)
 
 onMounted(async () => {
   await loadData()
@@ -19,12 +21,12 @@ onMounted(async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const [servicesResponse, categoriesResponse] = await Promise.all([
+    const [servicesResponse, categoryTypesResponse] = await Promise.all([
       servicesApi.getAll(),
-      categoriesApi.getAll()
+      categoryTypesApi.getAll()
     ])
     services.value = servicesResponse.data
-    categories.value = categoriesResponse.data
+    categoryTypes.value = categoryTypesResponse.data
   } catch (error) {
     console.error('Error loading data:', error)
   } finally {
@@ -32,11 +34,23 @@ const loadData = async () => {
   }
 }
 
+const loadCategoriesByType = async (typeId: number) => {
+  loadingCategories.value = true
+  try {
+    const response = await categoriesApi.getByType(typeId)
+    categories.value = response.data
+  } catch (error) {
+    console.error('Error loading categories by type:', error)
+  } finally {
+    loadingCategories.value = false
+  }
+}
+
 const filteredServices = () => {
   let filtered = services.value
 
-  if (selectedCategory.value) {
-    filtered = filtered.filter((s) => s.categoryId === selectedCategory.value)
+  if (selectedTypeId.value) {
+    filtered = filtered.filter((s) => s.category?.type === categoryTypes.value.find(t => t.id === selectedTypeId.value)?.name)
   }
 
   if (searchQuery.value) {
@@ -48,8 +62,23 @@ const filteredServices = () => {
   return filtered
 }
 
-const selectCategory = (categoryId: number | null) => {
-  selectedCategory.value = categoryId
+const selectType = async (typeId: number | null) => {
+  selectedTypeId.value = typeId
+  if (typeId) {
+    await loadCategoriesByType(typeId)
+  } else {
+    categories.value = []
+  }
+}
+
+const getIconForType = (typeName: string) => {
+  const iconMap: Record<string, string> = {
+    'Операторы': 'pi pi-mobile',
+    'Видео': 'pi pi-play',
+    'Музыка': 'pi pi-volume-up',
+    'Другое': 'pi pi-cloud'
+  }
+  return iconMap[typeName] || 'pi pi-tag'
 }
 
 const goToService = (serviceId: number) => {
@@ -94,27 +123,46 @@ const goToJoinFamily = () => {
             <div class="category-filters">
               <button
                 class="filter-btn"
-                :class="{ active: selectedCategory === null }"
-                @click="selectCategory(null)"
+                :class="{ active: selectedTypeId === null }"
+                @click="selectType(null)"
               >
                 <i class="pi pi-th-large"></i>
                 <span>Все</span>
               </button>
               <button
-                v-for="category in categories"
-                :key="category.id"
+                v-for="type in categoryTypes"
+                :key="type.id"
                 class="filter-btn"
-                :class="{ active: selectedCategory === category.id }"
-                @click="selectCategory(category.id)"
+                :class="{ active: selectedTypeId === type.id }"
+                @click="selectType(type.id!)"
               >
-                <img
-                  v-if="category.icon"
-                  :src="category.icon"
-                  :alt="category.name"
-                  class="category-icon-img"
-                />
-                <span>{{ category.name }}</span>
+                <i :class="getIconForType(type.name)"></i>
+                <span>{{ type.name }}</span>
               </button>
+            </div>
+
+            <!-- Categories for selected type -->
+            <div v-if="selectedTypeId && categories.length > 0" class="subcategory-section">
+              <div class="subcategory-filters">
+                <button
+                  v-for="category in categories"
+                  :key="category.id"
+                  class="subcategory-btn"
+                >
+                  <img
+                    v-if="category.icon"
+                    :src="category.icon"
+                    :alt="category.name"
+                    class="category-icon-img"
+                  />
+                  <span>{{ category.name }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="loadingCategories" class="loading-categories">
+              <i class="pi pi-spin pi-spinner"></i>
+              <span>Загрузка категорий...</span>
             </div>
           </div>
 
@@ -348,10 +396,61 @@ const goToJoinFamily = () => {
   box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
+.filter-btn i {
+  font-size: 1.125rem;
+}
+
+/* Subcategories */
+.subcategory-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.subcategory-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.subcategory-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.subcategory-btn:hover {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  color: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+}
+
 .category-icon-img {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
+}
+
+.loading-categories {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  color: #16a34a;
+  font-size: 0.9375rem;
 }
 
 /* Loading */

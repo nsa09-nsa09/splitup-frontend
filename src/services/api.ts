@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ServiceCategory, Service, SubscriptionPlan } from '@/types'
+import type { CategoryType, ServiceCategory, Service, SubscriptionPlan } from '@/types'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
@@ -10,9 +10,20 @@ const api = axios.create({
   }
 })
 
+// Category Types API
+export const categoryTypesApi = {
+  getAll: () => api.get<CategoryType[]>('/category-types'),
+  getById: (id: number) => api.get<CategoryType>(`/category-types/${id}`),
+  create: (categoryType: CategoryType) => api.post<CategoryType>('/category-types', categoryType),
+  update: (id: number, categoryType: CategoryType) =>
+    api.put<CategoryType>(`/category-types/${id}`, categoryType),
+  delete: (id: number) => api.delete(`/category-types/${id}`)
+}
+
 // Service Categories API
 export const categoriesApi = {
   getAll: () => api.get<ServiceCategory[]>('/services/categories'),
+  getByType: (typeId: number) => api.get<ServiceCategory[]>(`/services/categories/by-type/${typeId}`),
   getById: (id: number) => api.get<ServiceCategory>(`/services/categories/${id}`),
   create: (category: ServiceCategory) => api.post<ServiceCategory>('/services/categories', category),
   update: (id: number, category: ServiceCategory) =>

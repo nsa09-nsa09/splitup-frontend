@@ -1,6 +1,13 @@
+export interface CategoryType {
+  id?: number
+  name: string
+  displayOrder?: number
+}
+
 export interface ServiceCategory {
   id?: number
   name: string
+  type: string
   icon?: string
   createdAt?: string
 }
@@ -10,14 +17,18 @@ export interface Service {
   name: string
   description?: string
   logoUrl?: string
-  categoryId: number
-  isActive: boolean
+  categoryId?: number
+  categoryName?: string
+  isActive?: boolean
   createdAt?: string
   updatedAt?: string
   category?: ServiceCategory
   icon?: string
   color?: string
   planCount?: number
+  plansCount?: number
+  priceFrom?: number
+  familyPriceFrom?: number
 }
 
 export interface SubscriptionPlan {
