@@ -30,8 +30,8 @@ const goToMainApp = () => {
     <Menubar :model="menuItems" class="admin-menu">
       <template #start>
         <div class="admin-title">
-          <i class="pi pi-crown" style="font-size: 1.5rem; color: #dc2626; filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.3))"></i>
-          <span style="margin-left: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">fairpay Admin</span>
+          <i class="pi pi-crown" style="font-size: 1.5rem; color: #16a34a; filter: drop-shadow(0 2px 4px rgba(22, 163, 74, 0.3))"></i>
+          <span style="margin-left: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">BolipTole Admin</span>
         </div>
       </template>
       <template #end>
@@ -81,7 +81,7 @@ const goToMainApp = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #dc2626;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 0.625rem 1.25rem;
@@ -90,13 +90,13 @@ const goToMainApp = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
 .main-app-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
-  background: #b91c1c;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+  background: #15803d;
 }
 
 @media (max-width: 768px) {

@@ -75,7 +75,7 @@ const handleInput = (event: Event) => {
         <div class="verify-card">
           <div class="card-header">
             <div class="icon-wrapper">
-              <i class="pi pi-envelope" style="font-size: 3rem; color: #dc2626"></i>
+              <i class="pi pi-envelope" style="font-size: 3rem; color: #16a34a"></i>
             </div>
             <h1>Подтверждение email</h1>
             <p>Мы отправили 6-значный код на</p>
@@ -144,7 +144,7 @@ const handleInput = (event: Event) => {
 }
 
 .icon-wrapper {
-  background: #fef2f2;
+  background: #f0fdf4;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -168,7 +168,7 @@ const handleInput = (event: Event) => {
 }
 
 .card-header .email {
-  color: #dc2626;
+  color: #16a34a;
   font-weight: 600;
   font-size: 1.125rem;
 }
@@ -208,8 +208,8 @@ const handleInput = (event: Event) => {
 
 .code-input:focus {
   outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .code-input::placeholder {
@@ -218,7 +218,7 @@ const handleInput = (event: Event) => {
 }
 
 .btn-verify {
-  background: #dc2626;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 1rem;
@@ -231,9 +231,9 @@ const handleInput = (event: Event) => {
 }
 
 .btn-verify:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #15803d;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 .btn-verify:disabled {
@@ -253,7 +253,7 @@ const handleInput = (event: Event) => {
 }
 
 .form-footer .link {
-  color: #dc2626;
+  color: #16a34a;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -262,7 +262,7 @@ const handleInput = (event: Event) => {
 }
 
 .form-footer .link:hover {
-  color: #b91c1c;
+  color: #15803d;
   text-decoration: underline;
 }
 

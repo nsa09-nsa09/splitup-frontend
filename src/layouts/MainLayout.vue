@@ -44,7 +44,7 @@ const handleLogout = () => {
       <div class="header-container">
         <div class="logo" @click="navigateTo('/')">
           <i class="pi pi-th-large"></i>
-          <span>fairpay</span>
+          <span>BolipTole</span>
         </div>
 
         <nav class="main-nav">
@@ -100,7 +100,7 @@ const handleLogout = () => {
     <footer class="site-footer">
       <div class="footer-container">
         <div class="footer-section">
-          <h4>fairpay</h4>
+          <h4>BolipTole</h4>
           <p>Экономьте на подписках вместе с друзьями</p>
         </div>
         <div class="footer-section">
@@ -117,12 +117,12 @@ const handleLogout = () => {
         </div>
         <div class="footer-section">
           <h5>Связаться</h5>
-          <a href="#">support@fairpay.kz</a>
+          <a href="#">support@boliptole.kz</a>
           <a href="#">+7 777 123 4567</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 fairpay. Все права защищены.</p>
+        <p>&copy; 2025 BolipTole. Все права защищены.</p>
       </div>
     </footer>
   </div>
@@ -161,7 +161,7 @@ const handleLogout = () => {
   gap: 0.75rem;
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -175,8 +175,8 @@ const handleLogout = () => {
 
 .logo i {
   font-size: 1.75rem;
-  color: #dc2626;
-  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.3));
+  color: #16a34a;
+  filter: drop-shadow(0 2px 4px rgba(22, 163, 74, 0.3));
 }
 
 .main-nav {
@@ -199,13 +199,13 @@ const handleLogout = () => {
 }
 
 .nav-link:hover {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #f0fdf4;
+  color: #16a34a;
 }
 
 .nav-link.active {
-  color: #dc2626;
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #16a34a;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
   font-weight: 600;
 }
 
@@ -229,15 +229,15 @@ const handleLogout = () => {
 }
 
 .btn-primary {
-  background: #dc2626;
+  background: #16a34a;
   color: white;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
-  background: #b91c1c;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+  background: #15803d;
 }
 
 .btn-secondary {
@@ -247,9 +247,9 @@ const handleLogout = () => {
 }
 
 .btn-secondary:hover {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #dc2626;
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #16a34a;
 }
 
 .user-menu {
@@ -289,14 +289,14 @@ const handleLogout = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 .btn-logout:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
+  background: #dcfce7;
+  border-color: #86efac;
 }
 
 /* Content */
@@ -311,7 +311,7 @@ const handleLogout = () => {
   color: white;
   padding: 3rem 0 1rem;
   margin-top: 4rem;
-  border-top: 3px solid #dc2626;
+  border-top: 3px solid #16a34a;
 }
 
 .footer-container {
@@ -327,7 +327,7 @@ const handleLogout = () => {
 .footer-section h4 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -355,7 +355,7 @@ const handleLogout = () => {
 }
 
 .footer-section a:hover {
-  color: #fca5a5;
+  color: #86efac;
 }
 
 .footer-bottom {

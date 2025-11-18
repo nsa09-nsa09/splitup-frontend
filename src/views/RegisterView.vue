@@ -95,7 +95,7 @@ const goToLogin = () => {
         <div class="register-card">
           <div class="card-header">
             <h1>Регистрация</h1>
-            <p>Создайте аккаунт fairpay</p>
+            <p>Создайте аккаунт BolipTole</p>
           </div>
 
           <form @submit.prevent="handleRegister" class="register-form">
@@ -231,8 +231,8 @@ const goToLogin = () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .form-group input::placeholder {
@@ -240,7 +240,7 @@ const goToLogin = () => {
 }
 
 .btn-register {
-  background: #dc2626;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 1rem;
@@ -253,9 +253,9 @@ const goToLogin = () => {
 }
 
 .btn-register:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #15803d;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 .btn-register:disabled {
@@ -274,7 +274,7 @@ const goToLogin = () => {
 }
 
 .form-footer .link {
-  color: #dc2626;
+  color: #16a34a;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -282,7 +282,7 @@ const goToLogin = () => {
 }
 
 .form-footer .link:hover {
-  color: #b91c1c;
+  color: #15803d;
   text-decoration: underline;
 }
 
