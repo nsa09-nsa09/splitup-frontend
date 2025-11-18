@@ -15,8 +15,19 @@
         dataKey="id"
       >
         <Column field="id" header="ID" sortable style="width: 80px"></Column>
+        <Column field="type" header="Тип" sortable style="width: 150px"></Column>
         <Column field="name" header="Название" sortable></Column>
-        <Column field="icon" header="Иконка"></Column>
+        <Column field="icon" header="Иконка">
+          <template #body="slotProps">
+            <img
+              v-if="slotProps.data.icon"
+              :src="slotProps.data.icon"
+              :alt="slotProps.data.name"
+              style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px;"
+            />
+            <span v-else class="text-gray-400">Нет иконки</span>
+          </template>
+        </Column>
         <Column field="createdAt" header="Дата создания" sortable>
           <template #body="slotProps">
             {{ formatDate(slotProps.data.createdAt) }}
@@ -42,23 +53,78 @@
     <Dialog
       v-model:visible="dialogVisible"
       :header="editingCategory?.id ? 'Редактировать категорию' : 'Добавить категорию'"
-      :style="{ width: '450px' }"
+      :style="{ width: '700px' }"
       modal
+      class="category-dialog"
     >
-      <div class="form-field">
-        <label for="name">Название *</label>
-        <InputText id="name" v-model="editingCategory.name" class="w-full" />
-      </div>
+      <div class="dialog-content">
+        <div class="form-field">
+          <label for="type">
+            <i class="pi pi-tag"></i>
+            Тип категории *
+          </label>
+          <Dropdown
+            id="type"
+            v-model="editingCategory.type"
+            :options="categoryTypes"
+            optionLabel="name"
+            optionValue="name"
+            placeholder="Выберите тип категории"
+            class="w-full"
+          />
+        </div>
 
-      <div class="form-field">
-        <label for="icon">Иконка (URL изображения) *</label>
-        <InputText id="icon" v-model="editingCategory.icon" class="w-full" placeholder="https://example.com/logo.png" />
-        <small class="helper-text">Введите полную ссылку на изображение логотипа (например, https://...)</small>
+        <div class="form-field">
+          <label for="name">
+            <i class="pi pi-align-left"></i>
+            Название категории *
+          </label>
+          <InputText
+            id="name"
+            v-model="editingCategory.name"
+            class="w-full"
+            placeholder="Например: Netflix, Spotify..."
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="icon">
+            <i class="pi pi-image"></i>
+            Логотип категории (URL) *
+          </label>
+          <InputText
+            id="icon"
+            v-model="editingCategory.icon"
+            class="w-full"
+            placeholder="https://example.com/logo.png"
+          />
+          <small class="helper-text">
+            <i class="pi pi-info-circle"></i>
+            Введите полную ссылку на изображение логотипа
+          </small>
+        </div>
+
+        <div v-if="editingCategory.icon" class="logo-preview">
+          <label>Предварительный просмотр:</label>
+          <img :src="editingCategory.icon" alt="Preview" />
+        </div>
       </div>
 
       <template #footer>
-        <Button label="Отмена" icon="pi pi-times" text @click="dialogVisible = false" />
-        <Button label="Сохранить" icon="pi pi-check" @click="saveCategory" />
+        <div class="dialog-footer">
+          <Button
+            label="Отмена"
+            icon="pi pi-times"
+            severity="secondary"
+            outlined
+            @click="dialogVisible = false"
+          />
+          <Button
+            label="Сохранить"
+            icon="pi pi-check"
+            @click="saveCategory"
+          />
+        </div>
       </template>
     </Dialog>
   </AdminLayout>
@@ -66,24 +132,37 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { categoriesApi } from '@/services/api'
-import type { ServiceCategory } from '@/types'
+import { categoriesApi, categoryTypesApi } from '@/services/api'
+import type { ServiceCategory, CategoryType } from '@/types'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
+import Dropdown from 'primevue/dropdown'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 const categories = ref<ServiceCategory[]>([])
+const categoryTypes = ref<CategoryType[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
+
 const editingCategory = ref<ServiceCategory>({
   name: '',
+  type: '',
   icon: ''
 })
+
+const loadCategoryTypes = async () => {
+  try {
+    const response = await categoryTypesApi.getAll()
+    categoryTypes.value = response.data
+  } catch (error) {
+    console.error('Error loading category types:', error)
+  }
+}
 
 const loadCategories = async () => {
   loading.value = true
@@ -107,7 +186,8 @@ const openDialog = (category?: ServiceCategory) => {
   if (category) {
     editingCategory.value = { ...category }
   } else {
-    editingCategory.value = { name: '', icon: '' }
+    const defaultType = categoryTypes.value.length > 0 ? categoryTypes.value[0].name : ''
+    editingCategory.value = { name: '', type: defaultType, icon: '' }
   }
   dialogVisible.value = true
 }
@@ -173,8 +253,9 @@ const formatDate = (date?: string) => {
   return new Date(date).toLocaleDateString('ru-RU')
 }
 
-onMounted(() => {
-  loadCategories()
+onMounted(async () => {
+  await loadCategoryTypes()
+  await loadCategories()
 })
 </script>
 
@@ -298,5 +379,175 @@ onMounted(() => {
 :deep(.p-textarea:focus) {
   border-color: #16a34a;
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+/* Dialog styles */
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.dialog-content .form-field {
+  position: relative;
+}
+
+.dialog-content .form-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #111827;
+  font-size: 1.125rem;
+}
+
+.dialog-content .form-field label i {
+  color: #16a34a;
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(22, 163, 74, 0.2));
+}
+
+.helper-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #f0f9ff;
+  border-left: 4px solid #16a34a;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.helper-text i {
+  color: #16a34a;
+  font-size: 1.125rem;
+}
+
+.logo-preview {
+  padding: 1.5rem;
+  background: #f9fafb;
+  border: 2px dashed #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.logo-preview label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #6b7280;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logo-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+:deep(.category-dialog .p-dialog-header) {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-bottom: 3px solid #16a34a;
+  padding: 2rem 2.5rem;
+}
+
+:deep(.category-dialog .p-dialog-title) {
+  color: #111827;
+  font-weight: 700;
+  font-size: 1.75rem;
+}
+
+:deep(.category-dialog .p-dialog-content) {
+  padding: 2.5rem 2.5rem;
+  min-height: 400px;
+}
+
+:deep(.category-dialog .p-dialog-footer) {
+  padding: 1.75rem 2.5rem;
+  background: #f9fafb;
+  border-top: 2px solid #e5e7eb;
+}
+
+:deep(.category-dialog .p-inputtext),
+:deep(.category-dialog .p-dropdown) {
+  padding: 1rem 1.25rem;
+  font-size: 1.0625rem;
+  border-radius: 10px;
+  border-width: 2px;
+}
+
+:deep(.category-dialog .p-dropdown-label) {
+  padding: 0.5rem 0;
+  font-size: 1.0625rem;
+}
+
+:deep(.category-dialog .p-button) {
+  padding: 1rem 2rem;
+  font-size: 1.0625rem;
+  min-width: 140px;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+:deep(.category-dialog .p-button:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.category-dialog .p-button-outlined) {
+  border-width: 2px;
+}
+
+:deep(.category-dialog) {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-gray-400 {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  :deep(.category-dialog) {
+    width: 95% !important;
+  }
+
+  :deep(.category-dialog .p-dialog-header),
+  :deep(.category-dialog .p-dialog-content),
+  :deep(.category-dialog .p-dialog-footer) {
+    padding: 1.5rem;
+  }
+
+  :deep(.category-dialog .p-dialog-title) {
+    font-size: 1.25rem;
+  }
 }
 </style>

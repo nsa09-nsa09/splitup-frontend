@@ -50,7 +50,12 @@ const router = createRouter({
     // Admin Routes
     {
       path: '/admin',
-      redirect: '/admin/categories'
+      redirect: '/admin/category-types'
+    },
+    {
+      path: '/admin/category-types',
+      name: 'admin-category-types',
+      component: () => import('../views/CategoryTypesView.vue')
     },
     {
       path: '/admin/categories',
