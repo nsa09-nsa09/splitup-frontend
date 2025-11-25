@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <!-- Google colors circle -->
+  <circle cx="60" cy="45" r="25" fill="#4285F4"/>
+  <path d="M 60 20 A 25 25 0 0 1 85 45 L 60 45 Z" fill="#EA4335"/>
+  <path d="M 60 45 L 85 45 A 25 25 0 0 1 60 70 Z" fill="#FBBC04"/>
+  <path d="M 60 70 A 25 25 0 0 1 35 45 L 60 45 Z" fill="#34A853"/>
+  <!-- Google One text -->
+  <text x="115" y="50" font-family="Arial, sans-serif" font-size="22" font-weight="600" fill="#5F6368">Google</text>
+  <text x="115" y="72" font-family="Arial, sans-serif" font-size="22" font-weight="600" fill="#5F6368">One</text>
+</svg>

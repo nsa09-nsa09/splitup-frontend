@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <!-- Altel logo -->
+  <text x="100" y="50" font-family="Arial, sans-serif" font-size="42" font-weight="bold" text-anchor="middle" fill="#E30613">altel</text>
+  <circle cx="175" cy="40" r="8" fill="#E30613"/>
+</svg>

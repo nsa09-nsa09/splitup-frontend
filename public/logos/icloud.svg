@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <!-- Cloud shape -->
+  <path d="M 60 50 Q 50 30, 70 30 Q 80 20, 90 30 Q 110 25, 120 40 Q 140 40, 140 55 Q 140 70, 120 70 L 60 70 Q 40 70, 40 55 Q 40 40, 60 50 Z" fill="#3B99FC"/>
+  <!-- iCloud+ text -->
+  <text x="100" y="92" font-family="Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#FFFFFF">iCloud+</text>
+</svg>

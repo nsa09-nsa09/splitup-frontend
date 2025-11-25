@@ -8,7 +8,11 @@ export interface ServiceCategory {
   id?: number
   name: string
   type: string
+  typeId?: number
   icon?: string
+  priceFrom?: number
+  savingsPercentage?: number
+  description?: string
   createdAt?: string
 }
 
@@ -47,4 +51,23 @@ export interface SubscriptionPlan {
   createdAt?: string
   updatedAt?: string
   service?: Service
+}
+
+export interface CategoryPlan {
+  id?: number
+  categoryId: number
+  categoryName?: string
+  name: string
+  description?: string
+  slots: number
+  discountPercentage?: number
+  pricePerPerson: number
+  commission?: number
+  originalPrice?: number
+  individualPrice?: number
+  totalPrice?: number
+  isPopular: boolean
+  isActive?: boolean
+  createdAt?: string
+  updatedAt?: string
 }

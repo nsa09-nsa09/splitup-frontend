@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import MainLayout from '@/layouts/MainLayout.vue'
@@ -8,6 +9,7 @@ import MainLayout from '@/layouts/MainLayout.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const formData = ref({
   email: '',
@@ -21,8 +23,8 @@ const handleLogin = async () => {
   if (!formData.value.email || !formData.value.password) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Заполните все поля',
+      summary: t('errors.error'),
+      detail: t('errors.fillAllFields'),
       life: 3000
     })
     return
@@ -34,8 +36,8 @@ const handleLogin = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Успешно',
-      detail: 'Вы успешно вошли',
+      summary: t('success.success'),
+      detail: t('success.loggedIn'),
       life: 3000
     })
 
@@ -43,8 +45,8 @@ const handleLogin = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: error.response?.data?.message || 'Неверный email или пароль',
+      summary: t('errors.error'),
+      detail: error.response?.data?.message || t('errors.invalidEmailOrPassword'),
       life: 3000
     })
   } finally {
@@ -63,13 +65,13 @@ const goToRegister = () => {
       <div class="login-container">
         <div class="login-card">
           <div class="card-header">
-            <h1>Вход</h1>
-            <p>Войдите в свой аккаунт BolipTole</p>
+            <h1>{{ t('auth.login') }}</h1>
+            <p>{{ t('auth.loginSubtitle') }}</p>
           </div>
 
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email">{{ t('auth.email') }}</label>
               <input
                 id="email"
                 v-model="formData.email"
@@ -80,14 +82,14 @@ const goToRegister = () => {
             </div>
 
             <div class="form-group">
-              <label for="password">Пароль</label>
+              <label for="password">{{ t('auth.password') }}</label>
               <div class="password-input-wrapper">
                 <input
                   id="password"
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
                   required
-                  placeholder="Введите пароль"
+                  :placeholder="t('auth.enterPassword')"
                 />
                 <button
                   type="button"
@@ -101,13 +103,13 @@ const goToRegister = () => {
 
             <button type="submit" class="btn-login" :disabled="loading">
               <i v-if="loading" class="pi pi-spin pi-spinner"></i>
-              <span v-else>Войти</span>
+              <span v-else>{{ t('auth.loginLink') }}</span>
             </button>
 
             <div class="form-footer">
               <p>
-                Нет аккаунта?
-                <a @click="goToRegister" class="link">Зарегистрироваться</a>
+                {{ t('auth.noAccount') }}
+                <a @click="goToRegister" class="link">{{ t('auth.registerLink') }}</a>
               </p>
             </div>
           </form>

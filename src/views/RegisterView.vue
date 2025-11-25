@@ -3,11 +3,13 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
+import { useI18n } from 'vue-i18n'
 import MainLayout from '@/layouts/MainLayout.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 // Загрузка сохранённого состояния из sessionStorage
 const loadSavedState = () => {
@@ -65,8 +67,8 @@ const sendCode = async () => {
   if (!email.value) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Введите email',
+      summary: t('errors.error'),
+      detail: t('auth.email'),
       life: 3000
     })
     return
@@ -78,8 +80,8 @@ const sendCode = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Успешно',
-      detail: 'Код отправлен на вашу почту',
+      summary: t('success.success'),
+      detail: t('success.codeSent'),
       life: 3000
     })
 
@@ -87,8 +89,8 @@ const sendCode = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: error.response?.data?.message || 'Ошибка отправки кода',
+      summary: t('errors.error'),
+      detail: error.response?.data?.message || t('errors.sendCodeError'),
       life: 3000
     })
   } finally {
@@ -101,8 +103,8 @@ const verifyCode = async () => {
   if (code.value.length !== 6) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Код должен содержать 6 цифр',
+      summary: t('errors.error'),
+      detail: t('errors.codeMustBe6'),
       life: 3000
     })
     return
@@ -114,8 +116,8 @@ const verifyCode = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Успешно',
-      detail: 'Код подтвержден',
+      summary: t('success.success'),
+      detail: t('success.codeConfirmed'),
       life: 3000
     })
 
@@ -123,8 +125,8 @@ const verifyCode = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: error.response?.data?.message || 'Неверный код',
+      summary: t('errors.error'),
+      detail: error.response?.data?.message || t('errors.invalidCode'),
       life: 3000
     })
   } finally {
@@ -137,8 +139,8 @@ const completeRegistration = async () => {
   if (!formData.value.username || !formData.value.password) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Заполните все обязательные поля',
+      summary: t('errors.error'),
+      detail: t('errors.fillRequired'),
       life: 3000
     })
     return
@@ -147,8 +149,8 @@ const completeRegistration = async () => {
   if (formData.value.password !== formData.value.confirmPassword) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Пароли не совпадают',
+      summary: t('errors.error'),
+      detail: t('errors.passwordMismatch'),
       life: 3000
     })
     return
@@ -157,8 +159,8 @@ const completeRegistration = async () => {
   if (formData.value.password.length < 6) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: 'Пароль должен содержать минимум 6 символов',
+      summary: t('errors.error'),
+      detail: t('errors.passwordMinLength'),
       life: 3000
     })
     return
@@ -175,8 +177,8 @@ const completeRegistration = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Успешно',
-      detail: 'Регистрация завершена!',
+      summary: t('success.success'),
+      detail: t('success.registrationComplete'),
       life: 3000
     })
 
@@ -187,8 +189,8 @@ const completeRegistration = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Ошибка',
-      detail: error.response?.data?.message || 'Ошибка регистрации',
+      summary: t('errors.error'),
+      detail: error.response?.data?.message || t('errors.registrationError'),
       life: 3000
     })
   } finally {
@@ -225,13 +227,13 @@ const goBack = () => {
               <div class="icon-wrapper">
                 <i class="pi pi-envelope" style="font-size: 3rem; color: #16a34a"></i>
               </div>
-              <h1>Регистрация</h1>
-              <p>Введите ваш email для начала</p>
+              <h1>{{ t('auth.register') }}</h1>
+              <p>{{ t('auth.enterEmail') }}</p>
             </div>
 
             <form @submit.prevent="sendCode" class="register-form">
               <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">{{ t('auth.email') }}</label>
                 <input
                   id="email"
                   v-model="email"
@@ -244,13 +246,13 @@ const goBack = () => {
 
               <button type="submit" class="btn-register" :disabled="loading">
                 <i v-if="loading" class="pi pi-spin pi-spinner"></i>
-                <span v-else>Отправить код</span>
+                <span v-else>{{ t('auth.sendCode') }}</span>
               </button>
 
               <div class="form-footer">
                 <p>
-                  Уже есть аккаунт?
-                  <a @click="goToLogin" class="link">Войти</a>
+                  {{ t('auth.haveAccount') }}
+                  <a @click="goToLogin" class="link">{{ t('auth.loginLink') }}</a>
                 </p>
               </div>
             </form>
@@ -262,14 +264,14 @@ const goBack = () => {
               <div class="icon-wrapper">
                 <i class="pi pi-shield" style="font-size: 3rem; color: #16a34a"></i>
               </div>
-              <h1>Подтверждение</h1>
-              <p>Введите 6-значный код</p>
-              <p class="email-hint">отправленный на {{ email }}</p>
+              <h1>{{ t('auth.verificationCode') }}</h1>
+              <p>{{ t('auth.enterCode') }}</p>
+              <p class="email-hint">{{ t('auth.sentTo') }} {{ email }}</p>
             </div>
 
             <form @submit.prevent="verifyCode" class="register-form">
               <div class="form-group">
-                <label for="code">Код подтверждения</label>
+                <label for="code">{{ t('auth.verificationCode') }}</label>
                 <input
                   id="code"
                   :value="code"
@@ -287,12 +289,12 @@ const goBack = () => {
 
               <button type="submit" class="btn-register" :disabled="loading || code.length !== 6">
                 <i v-if="loading" class="pi pi-spin pi-spinner"></i>
-                <span v-else>Проверить код</span>
+                <span v-else>{{ t('auth.verifyCode') }}</span>
               </button>
 
               <button type="button" class="btn-back" @click="goBack">
                 <i class="pi pi-arrow-left"></i>
-                Назад
+                {{ t('nav.back') }}
               </button>
             </form>
           </div>
@@ -303,32 +305,32 @@ const goBack = () => {
               <div class="icon-wrapper">
                 <i class="pi pi-user" style="font-size: 3rem; color: #16a34a"></i>
               </div>
-              <h1>Завершение регистрации</h1>
-              <p>Заполните данные профиля</p>
+              <h1>{{ t('auth.completeRegistration') }}</h1>
+              <p>{{ t('auth.completeProfile') }}</p>
             </div>
 
             <form @submit.prevent="completeRegistration" class="register-form">
               <div class="form-group">
-                <label for="username">Имя пользователя *</label>
+                <label for="username">{{ t('auth.username') }} *</label>
                 <input
                   id="username"
                   v-model="formData.username"
                   type="text"
                   required
-                  placeholder="Введите имя пользователя"
+                  :placeholder="t('auth.enterUsername')"
                   autofocus
                 />
               </div>
 
               <div class="form-group">
-                <label for="password">Пароль *</label>
+                <label for="password">{{ t('auth.password') }} *</label>
                 <div class="password-input-wrapper">
                   <input
                     id="password"
                     v-model="formData.password"
                     :type="showPassword ? 'text' : 'password'"
                     required
-                    placeholder="Минимум 6 символов"
+                    :placeholder="t('auth.minChars')"
                   />
                   <button
                     type="button"
@@ -341,14 +343,14 @@ const goBack = () => {
               </div>
 
               <div class="form-group">
-                <label for="confirmPassword">Подтвердите пароль *</label>
+                <label for="confirmPassword">{{ t('auth.confirmPassword') }} *</label>
                 <div class="password-input-wrapper">
                   <input
                     id="confirmPassword"
                     v-model="formData.confirmPassword"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     required
-                    placeholder="Повторите пароль"
+                    :placeholder="t('auth.repeatPassword')"
                   />
                   <button
                     type="button"
@@ -362,12 +364,12 @@ const goBack = () => {
 
               <button type="submit" class="btn-register" :disabled="loading">
                 <i v-if="loading" class="pi pi-spin pi-spinner"></i>
-                <span v-else>Завершить регистрацию</span>
+                <span v-else>{{ t('auth.completeRegistration') }}</span>
               </button>
 
               <button type="button" class="btn-back" @click="goBack">
                 <i class="pi pi-arrow-left"></i>
-                Назад
+                {{ t('nav.back') }}
               </button>
             </form>
           </div>
@@ -377,17 +379,17 @@ const goBack = () => {
         <div class="progress-indicator">
           <div class="step" :class="{ active: step >= 1, completed: step > 1 }">
             <div class="step-circle">1</div>
-            <span>Email</span>
+            <span>{{ t('auth.stepEmail') }}</span>
           </div>
           <div class="step-line" :class="{ active: step > 1 }"></div>
           <div class="step" :class="{ active: step >= 2, completed: step > 2 }">
             <div class="step-circle">2</div>
-            <span>Код</span>
+            <span>{{ t('auth.stepCode') }}</span>
           </div>
           <div class="step-line" :class="{ active: step > 2 }"></div>
           <div class="step" :class="{ active: step >= 3 }">
             <div class="step-circle">3</div>
-            <span>Данные</span>
+            <span>{{ t('auth.stepData') }}</span>
           </div>
         </div>
       </div>

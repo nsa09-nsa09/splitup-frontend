@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { CategoryType, ServiceCategory, Service, SubscriptionPlan } from '@/types'
+import type { CategoryType, ServiceCategory, Service, SubscriptionPlan, CategoryPlan } from '@/types'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
@@ -22,13 +22,13 @@ export const categoryTypesApi = {
 
 // Service Categories API
 export const categoriesApi = {
-  getAll: () => api.get<ServiceCategory[]>('/services/categories'),
-  getByType: (typeId: number) => api.get<ServiceCategory[]>(`/services/categories/by-type/${typeId}`),
-  getById: (id: number) => api.get<ServiceCategory>(`/services/categories/${id}`),
-  create: (category: ServiceCategory) => api.post<ServiceCategory>('/services/categories', category),
+  getAll: () => api.get<ServiceCategory[]>('/categories'),
+  getByType: (typeId: number) => api.get<ServiceCategory[]>(`/categories/by-type/${typeId}`),
+  getById: (id: number) => api.get<ServiceCategory>(`/categories/${id}`),
+  create: (category: ServiceCategory) => api.post<ServiceCategory>('/categories', category),
   update: (id: number, category: ServiceCategory) =>
-    api.put<ServiceCategory>(`/services/categories/${id}`, category),
-  delete: (id: number) => api.delete(`/services/categories/${id}`)
+    api.put<ServiceCategory>(`/categories/${id}`, category),
+  delete: (id: number) => api.delete(`/categories/${id}`)
 }
 
 // Services API
@@ -45,11 +45,22 @@ export const plansApi = {
   getAll: () => api.get<SubscriptionPlan[]>('/plans'),
   getById: (id: number) => api.get<SubscriptionPlan>(`/plans/${id}`),
   getByService: (serviceId: number) =>
-    api.get<SubscriptionPlan[]>(`/services/${serviceId}/plans`),
+    api.get<SubscriptionPlan[]>(`/plans/service/${serviceId}`),
   create: (plan: SubscriptionPlan) => api.post<SubscriptionPlan>('/plans', plan),
   update: (id: number, plan: SubscriptionPlan) =>
     api.put<SubscriptionPlan>(`/plans/${id}`, plan),
   delete: (id: number) => api.delete(`/plans/${id}`)
+}
+
+// Category Plans API
+export const categoryPlansApi = {
+  getByCategory: (categoryId: number) =>
+    api.get<CategoryPlan[]>(`/category-plans/category/${categoryId}`),
+  getById: (id: number) => api.get<CategoryPlan>(`/category-plans/${id}`),
+  create: (plan: CategoryPlan) => api.post<CategoryPlan>('/category-plans', plan),
+  update: (id: number, plan: CategoryPlan) =>
+    api.put<CategoryPlan>(`/category-plans/${id}`, plan),
+  delete: (id: number) => api.delete(`/category-plans/${id}`)
 }
 
 export default api
