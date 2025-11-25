@@ -29,9 +29,9 @@ const languages = [
   { code: 'tg', name: 'Тоҷикӣ', flag: '🇹🇯' }
 ]
 
-const currentLanguage = computed(() =>
-  languages.find(lang => lang.code === locale.value) || languages[0]
-)
+const currentLanguage = computed(() => {
+  return languages.find(lang => lang.code === locale.value) || languages[0]
+})
 
 const changeLanguage = (langCode: string) => {
   locale.value = langCode
@@ -113,8 +113,8 @@ onUnmounted(() => {
           <!-- Language Selector -->
           <div ref="languageSelectorRef" class="language-selector">
             <button class="btn-language" @click="showLanguageMenu = !showLanguageMenu">
-              <span class="flag">{{ currentLanguage.flag }}</span>
-              <span class="lang-code">{{ currentLanguage.code.toUpperCase() }}</span>
+              <span class="flag">{{ currentLanguage?.flag }}</span>
+              <span class="lang-code">{{ currentLanguage?.code?.toUpperCase() }}</span>
               <i class="pi pi-angle-down"></i>
             </button>
 

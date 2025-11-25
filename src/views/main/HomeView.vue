@@ -2,14 +2,14 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MainLayout from '@/layouts/MainLayout.vue'
-import { servicesApi, categoryTypesApi } from '@/services/api'
-import type { Service, CategoryType } from '@/types'
+import { servicesApi, serviceTypesApi } from '@/services/api'
+import type { Service, ServiceType } from '@/types'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const { t } = useI18n()
 const services = ref<Service[]>([])
-const categoryTypes = ref<CategoryType[]>([])
+const serviceTypes = ref<ServiceType[]>([])
 const selectedTypeId = ref<number | null>(null)
 const searchQuery = ref('')
 const loading = ref(false)
@@ -22,16 +22,16 @@ onMounted(async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const [servicesResponse, categoryTypesResponse] = await Promise.all([
+    const [servicesResponse, serviceTypesResponse] = await Promise.all([
       servicesApi.getAll(),
-      categoryTypesApi.getAll()
+      serviceTypesApi.getAll()
     ])
     services.value = servicesResponse.data
-    categoryTypes.value = categoryTypesResponse.data
+    serviceTypes.value = serviceTypesResponse.data
 
-    // Автоматически выбираем вкладку "Операторы" (typeId = 1)
-    if (categoryTypes.value.length > 0) {
-      selectedTypeId.value = 1
+    // Автоматически выбираем первый тип сервисов
+    if (serviceTypes.value.length > 0 && serviceTypes.value[0]) {
+      selectedTypeId.value = serviceTypes.value[0].id ?? 1
     }
   } catch (error) {
     console.error('Error loading data:', error)
@@ -44,7 +44,7 @@ const filteredServices = () => {
   let filtered = services.value
 
   if (selectedTypeId.value) {
-    filtered = filtered.filter((s) => s.category?.type === categoryTypes.value.find(t => t.id === selectedTypeId.value)?.name)
+    filtered = filtered.filter((s) => s.typeId === selectedTypeId.value)
   }
 
   if (searchQuery.value) {
@@ -194,7 +194,7 @@ const goToJoinFamily = () => {
 
             <div class="category-filters">
               <button
-                v-for="type in categoryTypes"
+                v-for="type in serviceTypes"
                 :key="type.id"
                 class="filter-btn"
                 :class="{ active: selectedTypeId === type.id }"
@@ -220,15 +220,15 @@ const goToJoinFamily = () => {
             >
               <div class="service-icon">
                 <img
-                  v-if="service.logoUrl"
-                  :src="service.logoUrl"
+                  v-if="service.icon"
+                  :src="service.icon"
                   :alt="service.name"
                   class="service-logo"
                 />
               </div>
               <div class="service-info">
                 <h3>{{ service.name }}</h3>
-                <p>{{ service.plansCount || 0 }} тарифов</p>
+                <p v-if="service.priceFrom">от {{ service.priceFrom }} ₸</p>
               </div>
               <button class="service-arrow">
                 <i class="pi pi-arrow-right"></i>

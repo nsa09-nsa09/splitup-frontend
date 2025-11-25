@@ -87,7 +87,21 @@ const goBack = () => {
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
       </div>
 
-      <div v-else class="content-container">
+      <div v-else-if="service" class="content-container">
+        <!-- Service Header -->
+        <div class="service-hero">
+          <div class="hero-icon">
+            <img v-if="service.icon" :src="service.icon" :alt="service.name" class="hero-logo" />
+            <i v-else class="pi pi-box"></i>
+          </div>
+          <h1>{{ service.name }}</h1>
+          <p v-if="service.description">{{ service.description }}</p>
+          <div class="service-meta" v-if="service.priceFrom || service.savingsPercentage">
+            <span v-if="service.priceFrom" class="price-badge">от {{ service.priceFrom }} ₸</span>
+            <span v-if="service.savingsPercentage" class="savings-badge">-{{ service.savingsPercentage }}% экономия</span>
+          </div>
+        </div>
+
         <!-- Plans Grid -->
         <div class="plans-grid">
         <div
@@ -336,6 +350,31 @@ const goBack = () => {
 .service-hero p {
   font-size: 1.125rem;
   color: #6b7280;
+}
+
+.service-meta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.price-badge {
+  background: #e0e7ff;
+  color: #667eea;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.savings-badge {
+  background: #d1fae5;
+  color: #059669;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9375rem;
+  font-weight: 600;
 }
 
 .plans-grid {

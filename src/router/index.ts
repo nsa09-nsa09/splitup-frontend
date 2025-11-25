@@ -50,32 +50,22 @@ const router = createRouter({
     // Admin Routes
     {
       path: '/admin',
-      redirect: '/admin/category-types'
+      redirect: '/admin/service-types'
     },
     {
-      path: '/admin/category-types',
-      name: 'admin-category-types',
-      component: () => import('../views/CategoryTypesView.vue')
+      path: '/admin/service-types',
+      name: 'admin-service-types',
+      component: () => import('../views/ServiceTypesView.vue')
     },
     {
-      path: '/admin/category-types/:id',
-      name: 'admin-category-type-detail',
-      component: () => import('../views/CategoryTypeDetailView.vue')
+      path: '/admin/service-types/:typeId/services',
+      name: 'admin-services-by-type',
+      component: () => import('../views/admin/ServicesView.vue')
     },
     {
-      path: '/admin/categories',
-      name: 'admin-categories',
-      component: () => import('../views/CategoriesView.vue')
-    },
-    {
-      path: '/admin/plans',
-      name: 'admin-plans',
-      component: () => import('../views/PlansView.vue')
-    },
-    {
-      path: '/admin/category-types/:typeId/categories/:categoryId/plans',
-      name: 'admin-category-plans',
-      component: () => import('../views/CategoryPlansView.vue')
+      path: '/admin/services/:serviceId/plans',
+      name: 'admin-service-plans',
+      component: () => import('../views/admin/ServicePlansView.vue')
     }
   ]
 })

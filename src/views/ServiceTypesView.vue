@@ -2,12 +2,12 @@
   <AdminLayout>
     <div class="card">
       <div class="header">
-        <h1>Управление типами категорий</h1>
+        <h1>Управление типами сервисов</h1>
         <Button label="Добавить тип" icon="pi pi-plus" @click="openDialog()" />
       </div>
 
       <DataTable
-        :value="categoryTypes"
+        :value="serviceTypes"
         :loading="loading"
         stripedRows
         paginator
@@ -22,8 +22,8 @@
             <Button
               icon="pi pi-list"
               class="p-button-sm p-button-text p-button-info"
-              title="Категории"
-              @click="goToCategories(slotProps.data)"
+              title="Сервисы"
+              @click="goToServices(slotProps.data)"
             />
             <Button
               icon="pi pi-pencil"
@@ -35,7 +35,7 @@
               icon="pi pi-trash"
               class="p-button-sm p-button-text p-button-danger"
               title="Удалить"
-              @click="deleteCategoryType(slotProps.data)"
+              @click="deleteServiceType(slotProps.data)"
             />
           </template>
         </Column>
@@ -44,52 +44,60 @@
 
     <Dialog
       v-model:visible="dialogVisible"
-      :header="editingType?.id ? 'Редактировать тип' : 'Добавить тип'"
-      :style="{ width: '550px' }"
+      :header="editingType?.id ? 'Редактировать тип сервиса' : 'Новый тип сервиса'"
+      :style="{ width: '520px' }"
+      :pt="{
+        root: { style: 'border-radius: 20px; overflow: hidden;' },
+        header: { style: 'padding: 28px 32px 20px 32px; background: white; border-bottom: none;' },
+        content: { style: 'padding: 12px 32px 32px 32px;' },
+        footer: { style: 'padding: 24px 32px 28px 32px; background: #f9fafb; border-top: 1px solid #e5e7eb;' }
+      }"
       modal
-      class="category-type-dialog"
+      :draggable="false"
     >
-      <div class="dialog-content">
-        <div class="form-field">
-          <label for="name">
-            <i class="pi pi-align-left"></i>
-            Название типа *
-          </label>
+      <div style="display: flex; flex-direction: column; gap: 28px;">
+        <div style="padding: 18px 20px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 14px; color: #166534; font-size: 15px; line-height: 1.6;">
+          Типы сервисов используются для группировки: Операторы, Видео, Музыка и т.д.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label for="name" style="font-weight: 600; color: #374151; font-size: 16px;">Название</label>
           <InputText
             id="name"
             v-model="editingType.name"
-            class="w-full"
-            placeholder="Например: Операторы, Видео..."
+            style="width: 100%; padding: 16px 18px; font-size: 16px; border-radius: 12px; border: 2px solid #e5e7eb;"
+            placeholder="Введите название типа"
           />
         </div>
 
-        <div class="form-field">
-          <label for="displayOrder">
-            <i class="pi pi-sort-numeric-up"></i>
-            Порядок отображения *
-          </label>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label for="displayOrder" style="font-weight: 600; color: #374151; font-size: 16px;">Порядок сортировки</label>
           <InputNumber
             id="displayOrder"
             v-model="editingType.displayOrder"
             :min="0"
-            class="w-full"
+            :inputStyle="{ width: '100%', padding: '16px 18px', fontSize: '16px', borderRadius: '12px', border: '2px solid #e5e7eb' }"
+            style="width: 100%;"
+            placeholder="0"
           />
+          <small style="color: #9ca3af; font-size: 14px; margin-top: 4px;">Чем меньше число, тем выше в списке</small>
         </div>
       </div>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div style="display: flex; justify-content: flex-end; gap: 14px;">
           <Button
             label="Отмена"
-            icon="pi pi-times"
             severity="secondary"
-            outlined
+            text
+            style="padding: 14px 24px; font-size: 16px; font-weight: 600; border-radius: 12px;"
             @click="dialogVisible = false"
           />
           <Button
             label="Сохранить"
             icon="pi pi-check"
-            @click="saveCategoryType"
+            style="padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 12px; background: #16a34a; border-color: #16a34a;"
+            @click="saveServiceType"
           />
         </div>
       </template>
@@ -100,8 +108,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { categoryTypesApi } from '@/services/api'
-import type { CategoryType } from '@/types'
+import { serviceTypesApi } from '@/services/api'
+import type { ServiceType } from '@/types'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
@@ -113,25 +121,25 @@ import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
 const toast = useToast()
-const categoryTypes = ref<CategoryType[]>([])
+const serviceTypes = ref<ServiceType[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
-const editingType = ref<CategoryType>({
+const editingType = ref<ServiceType>({
   name: '',
   displayOrder: 0
 })
 
-const loadCategoryTypes = async () => {
+const loadServiceTypes = async () => {
   loading.value = true
   try {
-    const response = await categoryTypesApi.getAll()
-    categoryTypes.value = response.data
+    const response = await serviceTypesApi.getAll()
+    serviceTypes.value = response.data
   } catch (error) {
-    console.error('Error loading category types:', error)
+    console.error('Error loading service types:', error)
     toast.add({
       severity: 'error',
       summary: 'Ошибка',
-      detail: 'Не удалось загрузить типы категорий',
+      detail: 'Не удалось загрузить типы сервисов',
       life: 3000
     })
   } finally {
@@ -139,80 +147,80 @@ const loadCategoryTypes = async () => {
   }
 }
 
-const openDialog = (categoryType?: CategoryType) => {
-  if (categoryType) {
-    editingType.value = { ...categoryType }
+const openDialog = (serviceType?: ServiceType) => {
+  if (serviceType) {
+    editingType.value = { ...serviceType }
   } else {
-    const maxOrder = categoryTypes.value.reduce((max, ct) => Math.max(max, ct.displayOrder || 0), 0)
+    const maxOrder = serviceTypes.value.reduce((max, st) => Math.max(max, st.displayOrder || 0), 0)
     editingType.value = { name: '', displayOrder: maxOrder + 1 }
   }
   dialogVisible.value = true
 }
 
-const saveCategoryType = async () => {
+const saveServiceType = async () => {
   try {
     if (editingType.value.id) {
-      await categoryTypesApi.update(editingType.value.id, editingType.value)
+      await serviceTypesApi.update(editingType.value.id, editingType.value)
       toast.add({
         severity: 'success',
         summary: 'Успешно',
-        detail: 'Тип категории обновлен',
+        detail: 'Тип сервиса обновлен',
         life: 3000
       })
     } else {
-      await categoryTypesApi.create(editingType.value)
+      await serviceTypesApi.create(editingType.value)
       toast.add({
         severity: 'success',
         summary: 'Успешно',
-        detail: 'Тип категории создан',
+        detail: 'Тип сервиса создан',
         life: 3000
       })
     }
     dialogVisible.value = false
-    loadCategoryTypes()
+    loadServiceTypes()
   } catch (error) {
-    console.error('Error saving category type:', error)
+    console.error('Error saving service type:', error)
     toast.add({
       severity: 'error',
       summary: 'Ошибка',
-      detail: 'Не удалось сохранить тип категории',
+      detail: 'Не удалось сохранить тип сервиса',
       life: 3000
     })
   }
 }
 
-const deleteCategoryType = async (categoryType: CategoryType) => {
-  if (!categoryType.id) return
-  if (!confirm(`Удалить тип "${categoryType.name}"?`)) return
+const deleteServiceType = async (serviceType: ServiceType) => {
+  if (!serviceType.id) return
+  if (!confirm(`Удалить тип "${serviceType.name}"?`)) return
 
   try {
-    await categoryTypesApi.delete(categoryType.id)
+    await serviceTypesApi.delete(serviceType.id)
     toast.add({
       severity: 'success',
       summary: 'Успешно',
-      detail: 'Тип категории удален',
+      detail: 'Тип сервиса удален',
       life: 3000
     })
-    loadCategoryTypes()
+    loadServiceTypes()
   } catch (error) {
-    console.error('Error deleting category type:', error)
+    console.error('Error deleting service type:', error)
     toast.add({
       severity: 'error',
       summary: 'Ошибка',
-      detail: 'Не удалось удалить тип категории',
+      detail: 'Не удалось удалить тип сервиса',
       life: 3000
     })
   }
 }
 
-const goToCategories = (categoryType: CategoryType) => {
-  if (categoryType.id) {
-    router.push(`/admin/category-types/${categoryType.id}`)
+const goToServices = (serviceType: ServiceType) => {
+  if (serviceType.id) {
+    router.push(`/admin/service-types/${serviceType.id}/services`)
   }
 }
 
 onMounted(() => {
-  loadCategoryTypes()
+  loadServiceTypes()
 })
 </script>
 
@@ -245,60 +253,29 @@ onMounted(() => {
   background-clip: text;
 }
 
-.dialog-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 0.5rem 0;
+/* Dialog styling using PrimeVue passthrough */
+:deep(.p-dialog) {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.form-field label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
+:deep(.p-dialog-title) {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
-  font-size: 1rem;
 }
 
-.form-field label i {
-  color: #16a34a;
-  font-size: 1.125rem;
+:deep(.p-dialog-header-close) {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  background: #f3f4f6;
+  color: #6b7280;
+  transition: all 0.2s;
 }
 
-.helper-text {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin-top: 0.625rem;
-  padding: 0.625rem;
-  background: #f0f9ff;
-  border-left: 3px solid #16a34a;
-  border-radius: 6px;
-  color: #374151;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.helper-text i {
-  color: #16a34a;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.text-gray-400 {
-  color: #9ca3af;
-  font-size: 0.875rem;
-  font-style: italic;
+:deep(.p-dialog-header-close:hover) {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 :deep(.p-datatable) {
