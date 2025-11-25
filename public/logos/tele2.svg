@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <!-- Tele2 logo -->
+  <circle cx="60" cy="40" r="22" fill="#000000"/>
+  <text x="90" y="52" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#000000">Tele2</text>
+</svg>

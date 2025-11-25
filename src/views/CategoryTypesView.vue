@@ -17,16 +17,24 @@
         <Column field="id" header="ID" sortable style="width: 80px"></Column>
         <Column field="name" header="Название" sortable></Column>
         <Column field="displayOrder" header="Порядок" sortable style="width: 120px"></Column>
-        <Column header="Действия" style="width: 150px">
+        <Column header="Действия" style="width: 220px">
           <template #body="slotProps">
+            <Button
+              icon="pi pi-list"
+              class="p-button-sm p-button-text p-button-info"
+              title="Категории"
+              @click="goToCategories(slotProps.data)"
+            />
             <Button
               icon="pi pi-pencil"
               class="p-button-sm p-button-text"
+              title="Редактировать"
               @click="openDialog(slotProps.data)"
             />
             <Button
               icon="pi pi-trash"
               class="p-button-sm p-button-text p-button-danger"
+              title="Удалить"
               @click="deleteCategoryType(slotProps.data)"
             />
           </template>
@@ -91,6 +99,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { categoryTypesApi } from '@/services/api'
 import type { CategoryType } from '@/types'
 import AdminLayout from '@/layouts/AdminLayout.vue'
@@ -102,6 +111,7 @@ import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import { useToast } from 'primevue/usetoast'
 
+const router = useRouter()
 const toast = useToast()
 const categoryTypes = ref<CategoryType[]>([])
 const loading = ref(false)
@@ -192,6 +202,12 @@ const deleteCategoryType = async (categoryType: CategoryType) => {
       detail: 'Не удалось удалить тип категории',
       life: 3000
     })
+  }
+}
+
+const goToCategories = (categoryType: CategoryType) => {
+  if (categoryType.id) {
+    router.push(`/admin/category-types/${categoryType.id}`)
   }
 }
 

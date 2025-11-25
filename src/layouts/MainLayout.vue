@@ -1,17 +1,43 @@
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
-const navItems = [
-  { label: 'Главная', route: '/' },
-  { label: 'Сервисы', route: '/' },
-  { label: 'Мои группы', route: '/groups' },
-  { label: 'Профиль', route: '/profile' }
+const showLanguageMenu = ref(false)
+const languageSelectorRef = ref<HTMLElement | null>(null)
+
+const navItems = computed(() => [
+  { label: t('nav.home'), route: '/' },
+  { label: t('nav.myGroups'), route: '/groups' },
+  { label: t('nav.profile'), route: '/profile' }
+])
+
+const languages = [
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'kk', name: 'Қазақша', flag: '🇰🇿' },
+  { code: 'be', name: 'Беларуская', flag: '🇧🇾' },
+  { code: 'uz', name: 'O\'zbekcha', flag: '🇺🇿' },
+  { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
+  { code: 'hy', name: 'Հայերեն', flag: '🇦🇲' },
+  { code: 'ky', name: 'Кыргызча', flag: '🇰🇬' },
+  { code: 'tg', name: 'Тоҷикӣ', flag: '🇹🇯' }
 ]
+
+const currentLanguage = computed(() =>
+  languages.find(lang => lang.code === locale.value) || languages[0]
+)
+
+const changeLanguage = (langCode: string) => {
+  locale.value = langCode
+  localStorage.setItem('locale', langCode)
+  showLanguageMenu.value = false
+}
 
 const isActiveRoute = (routePath: string) => {
   if (routePath === '/' && route.path === '/') return true
@@ -35,6 +61,21 @@ const handleLogout = () => {
   authStore.logout()
   router.push('/')
 }
+
+// Close language menu when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  if (languageSelectorRef.value && !languageSelectorRef.value.contains(event.target as Node)) {
+    showLanguageMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
@@ -43,8 +84,17 @@ const handleLogout = () => {
     <header class="site-header">
       <div class="header-container">
         <div class="logo" @click="navigateTo('/')">
-          <i class="pi pi-th-large"></i>
-          <span>BolipTole</span>
+          <div class="logo-icon">
+            <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="15" r="10" fill="currentColor" opacity="0.9"/>
+              <circle cx="25" cy="20" r="8" fill="currentColor" opacity="0.7"/>
+              <circle cx="75" cy="20" r="8" fill="currentColor" opacity="0.7"/>
+              <path d="M 35 35 Q 35 25 50 25 Q 65 25 65 35 L 65 50 L 35 50 Z" fill="currentColor" opacity="0.9"/>
+              <path d="M 10 40 Q 10 32 25 32 Q 40 32 40 40 L 40 50 L 10 50 Z" fill="currentColor" opacity="0.7"/>
+              <path d="M 60 40 Q 60 32 75 32 Q 90 32 90 40 L 90 50 L 60 50 Z" fill="currentColor" opacity="0.7"/>
+            </svg>
+          </div>
+          <span class="logo-text">BölipTole</span>
         </div>
 
         <nav class="main-nav">
@@ -60,6 +110,29 @@ const handleLogout = () => {
         </nav>
 
         <div class="header-actions">
+          <!-- Language Selector -->
+          <div ref="languageSelectorRef" class="language-selector">
+            <button class="btn-language" @click="showLanguageMenu = !showLanguageMenu">
+              <span class="flag">{{ currentLanguage.flag }}</span>
+              <span class="lang-code">{{ currentLanguage.code.toUpperCase() }}</span>
+              <i class="pi pi-angle-down"></i>
+            </button>
+
+            <div v-if="showLanguageMenu" class="language-menu">
+              <button
+                v-for="lang in languages"
+                :key="lang.code"
+                class="language-option"
+                :class="{ active: locale === lang.code }"
+                @click="changeLanguage(lang.code)"
+              >
+                <span class="flag">{{ lang.flag }}</span>
+                <span class="lang-name">{{ lang.name }}</span>
+                <i v-if="locale === lang.code" class="pi pi-check"></i>
+              </button>
+            </div>
+          </div>
+
           <!-- Show Admin button only for ADMIN and MANAGER -->
           <button
             v-if="authStore.canAccessAdmin"
@@ -67,13 +140,13 @@ const handleLogout = () => {
             @click="goToAdmin"
           >
             <i class="pi pi-cog"></i>
-            <span>Админ</span>
+            <span>{{ t('nav.admin') }}</span>
           </button>
 
           <!-- Show Login button if not authenticated -->
           <button v-if="!authStore.isAuthenticated" class="btn-primary" @click="goToLogin">
             <i class="pi pi-user"></i>
-            <span>Войти</span>
+            <span>{{ t('nav.login') }}</span>
           </button>
 
           <!-- Show User menu if authenticated -->
@@ -84,7 +157,7 @@ const handleLogout = () => {
             </button>
             <button class="btn-logout" @click="handleLogout">
               <i class="pi pi-sign-out"></i>
-              <span>Выход</span>
+              <span>{{ t('nav.logout') }}</span>
             </button>
           </div>
         </div>
@@ -101,28 +174,28 @@ const handleLogout = () => {
       <div class="footer-container">
         <div class="footer-section">
           <h4>BolipTole</h4>
-          <p>Экономьте на подписках вместе с друзьями</p>
+          <p>{{ t('footer.tagline') }}</p>
         </div>
         <div class="footer-section">
-          <h5>Компания</h5>
-          <a href="#">О нас</a>
-          <a href="#">Контакты</a>
-          <a href="#">Помощь</a>
+          <h5>{{ t('footer.company') }}</h5>
+          <a href="#">{{ t('footer.aboutUs') }}</a>
+          <a href="#">{{ t('footer.contacts') }}</a>
+          <a href="#">{{ t('footer.help') }}</a>
         </div>
         <div class="footer-section">
-          <h5>Сервисы</h5>
-          <a href="#">Операторы</a>
-          <a href="#">Видео</a>
-          <a href="#">Музыка</a>
+          <h5>{{ t('footer.services') }}</h5>
+          <a href="#">{{ t('categories.operators') }}</a>
+          <a href="#">{{ t('categories.video') }}</a>
+          <a href="#">{{ t('categories.music') }}</a>
         </div>
         <div class="footer-section">
-          <h5>Связаться</h5>
+          <h5>{{ t('footer.contactUs') }}</h5>
           <a href="#">support@boliptole.kz</a>
           <a href="#">+7 777 123 4567</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 BolipTole. Все права защищены.</p>
+        <p>&copy; 2025 BolipTole. {{ t('footer.allRightsReserved') }}.</p>
       </div>
     </footer>
   </div>
@@ -133,13 +206,14 @@ const handleLogout = () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f8f9fa;
+  background: linear-gradient(180deg, #1a2942 0%, #0f1829 100%);
 }
 
 /* Header */
 .site-header {
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: rgba(15, 24, 41, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -158,25 +232,50 @@ const handleLogout = () => {
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  gap: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 12px;
 }
 
 .logo:hover {
+  transform: translateY(-2px);
+  background: rgba(96, 165, 250, 0.05);
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #7dd3fc 0%, #60a5fa 50%, #a78bfa 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+  transition: all 0.3s ease;
+}
+
+.logo:hover .logo-icon {
+  box-shadow: 0 6px 20px rgba(96, 165, 250, 0.5);
   transform: scale(1.05);
 }
 
-.logo i {
-  font-size: 1.75rem;
-  color: #16a34a;
-  filter: drop-shadow(0 2px 4px rgba(22, 163, 74, 0.3));
+.logo-icon svg {
+  width: 100%;
+  height: 100%;
+  color: white;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7dd3fc 0%, #60a5fa 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .main-nav {
@@ -191,27 +290,117 @@ const handleLogout = () => {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
+  color: #cbd5e1;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.3s ease;
   position: relative;
 }
 
 .nav-link:hover {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
 }
 
 .nav-link.active {
-  color: #16a34a;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: white;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
 }
 
 .header-actions {
   display: flex;
   gap: 1rem;
+  align-items: center;
+}
+
+/* Language Selector */
+.language-selector {
+  position: relative;
+}
+
+.btn-language {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-language:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(96, 165, 250, 0.5);
+  color: #60a5fa;
+}
+
+.btn-language .flag {
+  font-size: 1.25rem;
+}
+
+.btn-language .lang-code {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  min-width: 180px;
+  z-index: 1000;
+  border: 1px solid #e5e7eb;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: white;
+  border: none;
+  color: #374151;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.language-option:hover {
+  background: #f3f4f6;
+}
+
+.language-option.active {
+  background: #f0fdf4;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.language-option .flag {
+  font-size: 1.25rem;
+}
+
+.language-option .lang-name {
+  flex: 1;
+}
+
+.language-option i {
+  color: #16a34a;
+  font-size: 0.875rem;
 }
 
 .btn-primary,
@@ -229,27 +418,29 @@ const handleLogout = () => {
 }
 
 .btn-primary {
-  background: #16a34a;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
-  background: #15803d;
+  box-shadow: 0 4px 16px rgba(96, 165, 250, 0.5);
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
 }
 
 .btn-secondary {
-  background: #ffffff;
-  color: #374151;
-  border: 2px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-color: #16a34a;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(96, 165, 250, 0.5);
+  color: #60a5fa;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
 }
 
 .user-menu {

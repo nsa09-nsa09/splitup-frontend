@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { servicesApi, categoryTypesApi } from '@/services/api'
 import type { Service, CategoryType } from '@/types'
 
 const router = useRouter()
+const { t } = useI18n()
 const services = ref<Service[]>([])
 const categoryTypes = ref<CategoryType[]>([])
 const loading = ref(false)
@@ -81,7 +83,7 @@ onMounted(async () => {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Поиск сервиса..."
+            :placeholder="t('search.placeholder')"
             class="search-input"
           />
         </div>
@@ -104,12 +106,12 @@ onMounted(async () => {
       <div class="services-section">
         <div v-if="loading" class="loading">
           <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-          <p>Загрузка сервисов...</p>
+          <p>{{ t('service.loading') }}</p>
         </div>
 
         <div v-else-if="filteredServices.length === 0" class="empty-state">
           <i class="pi pi-inbox" style="font-size: 3rem; color: #9ca3af"></i>
-          <p>Сервисы не найдены</p>
+          <p>{{ t('service.notFound') }}</p>
         </div>
 
         <div v-else class="services-grid">
@@ -133,10 +135,10 @@ onMounted(async () => {
             <div class="service-info">
               <h3 class="service-name">{{ service.name }}</h3>
               <p class="service-description">
-                {{ service.description || 'Семейные тарифы' }}
+                {{ service.description || t('service.familyPlans') }}
               </p>
               <p class="service-plans">
-                {{ service.plansCount || service.planCount || 0 }} тарифа
+                {{ service.plansCount || service.planCount || 0 }} {{ t('service.planCount') }}
               </p>
             </div>
 

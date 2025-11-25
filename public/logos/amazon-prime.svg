@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120">
+  <!-- Prime text -->
+  <text x="150" y="50" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="#00A8E1">Prime</text>
+  <!-- Video text -->
+  <text x="150" y="90" font-family="Arial, sans-serif" font-size="28" text-anchor="middle" fill="#FFFFFF">Video</text>
+  <!-- Amazon smile -->
+  <path d="M 80 100 Q 150 110, 220 100" stroke="#FF9900" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="220" cy="100" r="3" fill="#FF9900"/>
+</svg>

@@ -58,6 +58,11 @@ const router = createRouter({
       component: () => import('../views/CategoryTypesView.vue')
     },
     {
+      path: '/admin/category-types/:id',
+      name: 'admin-category-type-detail',
+      component: () => import('../views/CategoryTypeDetailView.vue')
+    },
+    {
       path: '/admin/categories',
       name: 'admin-categories',
       component: () => import('../views/CategoriesView.vue')
@@ -66,6 +71,11 @@ const router = createRouter({
       path: '/admin/plans',
       name: 'admin-plans',
       component: () => import('../views/PlansView.vue')
+    },
+    {
+      path: '/admin/category-types/:typeId/categories/:categoryId/plans',
+      name: 'admin-category-plans',
+      component: () => import('../views/CategoryPlansView.vue')
     }
   ]
 })

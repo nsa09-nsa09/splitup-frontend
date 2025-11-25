@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { servicesApi, plansApi } from '@/services/api'
 import type { Service, SubscriptionPlan } from '@/types'
 import MainLayout from '@/layouts/MainLayout.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const service = ref<Service | null>(null)
 const plans = ref<SubscriptionPlan[]>([])
 const loading = ref(false)
+const showPlanModal = ref(false)
+const selectedPlan = ref<SubscriptionPlan | null>(null)
 
 const serviceId = computed(() => Number(route.params.id))
 
@@ -46,6 +50,16 @@ const calculateSavings = (plan: SubscriptionPlan) => {
   return Math.round(savings)
 }
 
+const openPlanModal = (plan: SubscriptionPlan) => {
+  selectedPlan.value = plan
+  showPlanModal.value = true
+}
+
+const closePlanModal = () => {
+  showPlanModal.value = false
+  selectedPlan.value = null
+}
+
 const selectPlan = (planId: number) => {
   router.push(`/plan/${planId}/join`)
 }
@@ -64,7 +78,7 @@ const goBack = () => {
         <div class="header-container">
           <button class="back-btn" @click="goBack">
             <i class="pi pi-arrow-left"></i>
-            <span>Назад</span>
+            <span>{{ t('nav.back') }}</span>
           </button>
         </div>
       </div>
@@ -74,20 +88,6 @@ const goBack = () => {
       </div>
 
       <div v-else class="content-container">
-        <!-- Service Hero -->
-        <div v-if="service" class="service-hero">
-          <div class="hero-icon">
-            <img
-              v-if="service.icon"
-              :src="service.icon"
-              :alt="service.name"
-              class="hero-logo"
-            />
-          </div>
-          <h1>{{ service.name }}</h1>
-          <p>Выберите подходящий тариф для вашей семьи или группы</p>
-        </div>
-
         <!-- Plans Grid -->
         <div class="plans-grid">
         <div
@@ -95,12 +95,12 @@ const goBack = () => {
           :key="plan.id"
           class="plan-card"
           :class="{ popular: plan.isPopular }"
-          @click="selectPlan(plan.id!)"
+          @click="openPlanModal(plan)"
         >
           <!-- Popular Badge -->
           <div v-if="plan.isPopular" class="popular-badge">
             <i class="pi pi-bolt"></i>
-            <span>Популярное</span>
+            <span>{{ t('plan.popular') }}</span>
           </div>
 
           <!-- Plan Header -->
@@ -110,7 +110,7 @@ const goBack = () => {
             </div>
             <div class="plan-title">
               <h3>{{ plan.name }}</h3>
-              <p>{{ plan.maxMembers }} пользователя + {{ plan.maxDevices || 1 }} устройство</p>
+              <p>{{ plan.maxMembers }} {{ t('serviceDetail.users') }} + {{ plan.maxDevices || 1 }} {{ t('serviceDetail.device') }}</p>
             </div>
             <button class="plan-arrow">
               <i class="pi pi-arrow-right"></i>
@@ -120,7 +120,7 @@ const goBack = () => {
           <!-- Plan Info -->
           <div class="plan-info">
             <div class="info-item">
-              <span class="label">{{ plan.maxMembers }} номеров</span>
+              <span class="label">{{ plan.maxMembers }} {{ t('serviceDetail.numbers') }}</span>
               <span
                 v-if="plan.discountPercentage"
                 class="discount"
@@ -133,33 +133,117 @@ const goBack = () => {
           <div class="plan-pricing">
             <div class="price-main">
               <span class="price-value">{{ calculatePricePerPerson(plan).toLocaleString() }} ₸</span>
-              <span class="price-label">на человека в месяц</span>
+              <span class="price-label">{{ t('serviceDetail.perPersonPerMonth') }}</span>
             </div>
             <div class="price-total">
               <span v-if="plan.originalPrice" class="original-price"
                 >{{ Math.round(plan.originalPrice).toLocaleString() }} ₸</span
               >
               <span class="total-price">{{ Math.round(plan.pricePerMonth).toLocaleString() }} ₸</span>
-              <span class="total-label">всего</span>
+              <span class="total-label">{{ t('serviceDetail.total') }}</span>
             </div>
           </div>
 
           <!-- Savings -->
           <div v-if="plan.originalPrice" class="plan-savings">
             <i class="pi pi-users"></i>
-            <span>Экономия до {{ calculateSavings(plan) }}% на человека</span>
+            <span>{{ t('serviceDetail.savingsUpTo') }} {{ calculateSavings(plan) }}% {{ t('serviceDetail.perPerson') }}</span>
           </div>
 
           <!-- Gift Badge -->
           <div v-if="plan.isPopular" class="gift-badge">
             <i class="pi pi-gift"></i>
-            <span>Роутер в подарок!</span>
+            <span>{{ t('serviceDetail.giftRouter') }}</span>
           </div>
         </div>
 
           <div v-if="plans.length === 0" class="empty-state">
             <i class="pi pi-inbox" style="font-size: 3rem; color: #9ca3af"></i>
-            <p>Тарифы не найдены</p>
+            <p>{{ t('serviceDetail.plansNotFound') }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Detail Modal -->
+      <div v-if="showPlanModal && selectedPlan" class="modal-overlay" @click="closePlanModal">
+        <div class="modal-content" @click.stop>
+          <button class="modal-close" @click="closePlanModal">
+            <i class="pi pi-times"></i>
+          </button>
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <div class="modal-icon">
+              <i class="pi pi-phone"></i>
+            </div>
+            <h2>{{ selectedPlan.name }}</h2>
+            <p>{{ selectedPlan.maxMembers }} номеров + {{ selectedPlan.maxDevices || 1 }} устройство</p>
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="modal-pricing">
+            <div class="modal-price-main">
+              <div class="price-row">
+                <span class="price-current">{{ Math.round(selectedPlan.pricePerMonth).toLocaleString() }} ₸</span>
+                <span v-if="selectedPlan.originalPrice" class="price-old">{{ Math.round(selectedPlan.originalPrice).toLocaleString() }} ₸</span>
+              </div>
+              <span class="price-period">в месяц</span>
+            </div>
+
+            <div v-if="selectedPlan.discountPercentage" class="discount-badge">
+              -{{ selectedPlan.discountPercentage }}%
+            </div>
+          </div>
+
+          <!-- Price Per Person -->
+          <div class="modal-per-person">
+            <div class="per-person-box">
+              <span class="per-person-value">{{ calculatePricePerPerson(selectedPlan).toLocaleString() }} ₸</span>
+              <span class="per-person-label">за человека в месяц</span>
+            </div>
+            <div v-if="selectedPlan.originalPrice" class="savings-info">
+              <i class="pi pi-check-circle"></i>
+              <span>Экономия до {{ calculateSavings(selectedPlan) }}% с человека</span>
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div class="modal-features">
+            <h3>Условия тарифа</h3>
+            <div class="feature-list">
+              <div class="feature-item">
+                <i class="pi pi-users"></i>
+                <span>До {{ selectedPlan.maxMembers }} номеров в одном тарифе</span>
+              </div>
+              <div class="feature-item">
+                <i class="pi pi-mobile"></i>
+                <span>До {{ selectedPlan.maxDevices || 1 }} устройств на номер</span>
+              </div>
+              <div v-if="selectedPlan.description" class="feature-item">
+                <i class="pi pi-info-circle"></i>
+                <span>{{ selectedPlan.description }}</span>
+              </div>
+              <div class="feature-item">
+                <i class="pi pi-shield"></i>
+                <span>Безопасное совместное использование</span>
+              </div>
+              <div class="feature-item">
+                <i class="pi pi-clock"></i>
+                <span>Ежемесячная подписка</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="modal-actions">
+            <button class="modal-action-btn primary" @click="selectPlan(selectedPlan.id!)">
+              <i class="pi pi-users"></i>
+              <span>Создать семью</span>
+            </button>
+            <button class="modal-action-btn secondary" @click="selectPlan(selectedPlan.id!)">
+              <i class="pi pi-user-plus"></i>
+              <span>Вступить в семью</span>
+            </button>
           </div>
         </div>
       </div>
@@ -473,6 +557,284 @@ const goBack = () => {
   font-size: 1.25rem;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  font-size: 1.25rem;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 1rem;
+}
+
+.modal-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.modal-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.modal-header p {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.modal-pricing {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-price-main {
+  flex: 1;
+}
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.price-current {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+.price-old {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: line-through;
+}
+
+.price-period {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.discount-badge {
+  background: #fbbf24;
+  color: #1f2937;
+  padding: 0.75rem 1.25rem;
+  border-radius: 50px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+}
+
+.modal-per-person {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.per-person-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.per-person-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.per-person-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.savings-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.savings-info i {
+  font-size: 1.125rem;
+}
+
+.modal-features {
+  margin-bottom: 2rem;
+}
+
+.modal-features h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.feature-item i {
+  color: #667eea;
+  font-size: 1.25rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.feature-item span {
+  flex: 1;
+  color: #4b5563;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.modal-action-btn {
+  border: none;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  flex-direction: column;
+}
+
+.modal-action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.modal-action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.modal-action-btn.secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.modal-action-btn.secondary:hover {
+  transform: translateY(-2px);
+  background: #f8f9ff;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.modal-action-btn i {
+  font-size: 1.5rem;
+}
+
+.modal-action-btn span {
+  font-size: 0.9375rem;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .plans-grid {
@@ -492,6 +854,33 @@ const goBack = () => {
   .hero-icon {
     width: 100px;
     height: 100px;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+    max-height: 95vh;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .price-current {
+    font-size: 2rem;
+  }
+
+  .modal-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
+  }
+
+  .modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-action-btn {
+    padding: 1rem 1.5rem;
   }
 }
 </style>
