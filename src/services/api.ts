@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ServiceType, Service, SubscriptionPlan } from '@/types'
+import type { ServiceType, Service, SubscriptionPlan, Wallet, Transaction, UserSubscription, User } from '@/types'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
@@ -42,6 +42,62 @@ export const plansApi = {
   update: (id: number, plan: Partial<SubscriptionPlan>) =>
     api.put<SubscriptionPlan>(`/plans/${id}`, plan),
   delete: (id: number) => api.delete(`/plans/${id}`)
+}
+
+// Wallet API
+export const walletApi = {
+  getWallet: (userId: number) => api.get<Wallet>('/wallet', { headers: { 'User-Id': userId } }),
+  getTransactions: (userId: number) =>
+    api.get<Transaction[]>('/wallet/transactions', { headers: { 'User-Id': userId } }),
+  getSubscriptions: (userId: number) =>
+    api.get<UserSubscription[]>('/wallet/subscriptions', { headers: { 'User-Id': userId } }),
+  deposit: (userId: number, amount: number, paymentMethod: string) =>
+    api.post<Transaction>('/wallet/deposit', { amount, paymentMethod }, { headers: { 'User-Id': userId } }),
+  withdraw: (userId: number, amount: number, paymentMethod: string) =>
+    api.post<Transaction>('/wallet/withdraw', { amount, paymentMethod }, { headers: { 'User-Id': userId } })
+}
+
+// Users API
+export const usersApi = {
+  getAll: () => api.get<User[]>('/users'),
+  getById: (id: number) => api.get<User>(`/users/${id}`),
+  getTransactions: (id: number) => api.get<Transaction[]>(`/users/${id}/transactions`),
+  getSubscriptions: (id: number) => api.get<UserSubscription[]>(`/users/${id}/subscriptions`)
+}
+
+// Speed Test API
+export interface SpeedTestResult {
+  id?: number
+  latitude: number
+  longitude: number
+  downloadSpeed: number
+  uploadSpeed: number
+  ping: number
+  providerType: string
+  city?: string
+  createdAt?: string
+}
+
+export interface SpeedTestStats {
+  city: string | null
+  providerType: string
+  avgDownloadSpeed: number
+  avgUploadSpeed: number
+  avgPing: number
+  count: number
+}
+
+export const speedTestApi = {
+  save: (data: SpeedTestResult) => api.post<SpeedTestResult>('/speedtest/save', data),
+  getAll: () => api.get<SpeedTestResult[]>('/speedtest'),
+  getByCity: (city: string) => api.get<SpeedTestResult[]>(`/speedtest/city/${city}`),
+  getByProvider: (provider: string) => api.get<SpeedTestResult[]>(`/speedtest/provider/${provider}`),
+  getFiltered: (city?: string, provider?: string) =>
+    api.get<SpeedTestResult[]>('/speedtest/filter', { params: { city, providerType: provider } }),
+  getByBounds: (minLat: number, maxLat: number, minLon: number, maxLon: number) =>
+    api.get<SpeedTestResult[]>('/speedtest/bounds', { params: { minLat, maxLat, minLon, maxLon } }),
+  getStatsByCity: () => api.get<SpeedTestStats[]>('/speedtest/stats/city'),
+  getStatsByProvider: () => api.get<SpeedTestStats[]>('/speedtest/stats/provider')
 }
 
 export default api

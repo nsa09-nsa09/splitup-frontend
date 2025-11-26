@@ -7,7 +7,8 @@ export default {
     admin: 'Admin',
     login: 'Kirish',
     logout: 'Chiqish',
-    back: 'Orqaga'
+    back: 'Orqaga',
+    speedTest: 'Internet tezligi'
   },
   search: {
     placeholder: 'Xizmat qidirish...'

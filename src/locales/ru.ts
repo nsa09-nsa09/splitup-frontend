@@ -7,7 +7,8 @@ export default {
     admin: 'Админ',
     login: 'Войти',
     logout: 'Выход',
-    back: 'Назад'
+    back: 'Назад',
+    speedTest: 'Скорость интернета'
   },
   search: {
     placeholder: 'Поиск сервиса...'
