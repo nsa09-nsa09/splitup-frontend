@@ -32,6 +32,11 @@ const router = createRouter({
       component: () => import('../views/main/ServiceDetailView.vue')
     },
     {
+      path: '/plan/:id',
+      name: 'plan-detail',
+      component: () => import('../views/main/PlanDetailView.vue')
+    },
+    {
       path: '/search',
       name: 'search',
       component: () => import('../views/main/HomeView.vue')
@@ -39,12 +44,17 @@ const router = createRouter({
     {
       path: '/groups',
       name: 'groups',
-      component: () => import('../views/main/HomeView.vue')
+      component: () => import('../views/main/GroupsView.vue')
+    },
+    {
+      path: '/speed-test',
+      name: 'speed-test',
+      component: () => import('../views/main/SpeedTestView.vue')
     },
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('../views/main/HomeView.vue')
+      component: () => import('../views/main/ProfileView.vue')
     },
 
     // Admin Routes
@@ -63,9 +73,29 @@ const router = createRouter({
       component: () => import('../views/admin/ServicesView.vue')
     },
     {
+      path: '/admin/services',
+      name: 'admin-all-services',
+      component: () => import('../views/admin/AllServicesView.vue')
+    },
+    {
       path: '/admin/services/:serviceId/plans',
       name: 'admin-service-plans',
       component: () => import('../views/admin/ServicePlansView.vue')
+    },
+    {
+      path: '/admin/plans',
+      name: 'admin-all-plans',
+      component: () => import('../views/admin/AllPlansView.vue')
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('../views/admin/UsersView.vue')
+    },
+    {
+      path: '/admin/users/:userId',
+      name: 'admin-user-detail',
+      component: () => import('../views/admin/UserDetailView.vue')
     }
   ]
 })

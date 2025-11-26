@@ -7,7 +7,8 @@ export default {
     admin: 'Ադմին',
     login: 'Մուտք',
     logout: 'Ելք',
-    back: 'Հետ'
+    back: 'Հdelays',
+    speedTest: 'Ինdelays արdelays'
   },
   search: {
     placeholder: 'Որոնել ծառայություն...'

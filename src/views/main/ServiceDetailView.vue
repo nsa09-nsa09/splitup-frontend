@@ -50,9 +50,8 @@ const calculateSavings = (plan: SubscriptionPlan) => {
   return Math.round(savings)
 }
 
-const openPlanModal = (plan: SubscriptionPlan) => {
-  selectedPlan.value = plan
-  showPlanModal.value = true
+const openPlanPage = (plan: SubscriptionPlan) => {
+  router.push(`/plan/${plan.id}`)
 }
 
 const closePlanModal = () => {
@@ -109,7 +108,7 @@ const goBack = () => {
           :key="plan.id"
           class="plan-card"
           :class="{ popular: plan.isPopular }"
-          @click="openPlanModal(plan)"
+          @click="openPlanPage(plan)"
         >
           <!-- Popular Badge -->
           <div v-if="plan.isPopular" class="popular-badge">

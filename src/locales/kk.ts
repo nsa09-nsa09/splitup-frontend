@@ -7,7 +7,8 @@ export default {
     admin: 'Әкімші',
     login: 'Кіру',
     logout: 'Шығу',
-    back: 'Артқа'
+    back: 'Артқа',
+    speedTest: 'Интернет жылдамдығы'
   },
   search: {
     placeholder: 'Қызметті іздеу...'

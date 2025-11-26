@@ -7,7 +7,8 @@ export default {
     admin: 'Admin',
     login: 'Daxil ol',
     logout: 'Çıxış',
-    back: 'Geri'
+    back: 'Geri',
+    speedTest: 'Internet sürəti'
   },
   search: {
     placeholder: 'Xidmət axtarışı...'

@@ -7,7 +7,8 @@ export default {
     admin: 'Админ',
     login: 'Ворид шудан',
     logout: 'Баромадан',
-    back: 'Бозгашт'
+    back: 'Бозгашт',
+    speedTest: 'Суръати интернет'
   },
   search: {
     placeholder: 'Ҷустуҷӯи хидмат...'

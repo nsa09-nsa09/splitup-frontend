@@ -15,7 +15,7 @@ const languageSelectorRef = ref<HTMLElement | null>(null)
 const navItems = computed(() => [
   { label: t('nav.home'), route: '/' },
   { label: t('nav.myGroups'), route: '/groups' },
-  { label: t('nav.profile'), route: '/profile' }
+  { label: t('nav.speedTest'), route: '/speed-test', icon: 'pi-bolt' }
 ])
 
 const languages = [
@@ -151,7 +151,7 @@ onUnmounted(() => {
 
           <!-- Show User menu if authenticated -->
           <div v-if="authStore.isAuthenticated" class="user-menu">
-            <button class="btn-user">
+            <button class="btn-user" @click="navigateTo('/profile')">
               <i class="pi pi-user"></i>
               <span>{{ authStore.user?.username }}</span>
             </button>
