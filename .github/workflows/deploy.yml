@@ -113,13 +113,18 @@ jobs:
             echo "Creating network if not exists..."
             docker network create splitup-network || true
 
-            # Start frontend
+            # Start frontend (--no-cache ensures .env changes are picked up)
             echo "Starting frontend..."
-            docker compose -f docker-compose.dev.yml up -d --build
+            docker compose -f docker-compose.dev.yml build --no-cache
+            docker compose -f docker-compose.dev.yml up -d
 
             # Clean up old images
             echo "Cleaning up old Docker images..."
             docker system prune -f
+
+            # Set permissions for nginx
+            echo "Setting permissions..."
+            chmod -R 755 /var/lib/docker/volumes/splitup-frontend-dist
 
             echo "Deployment completed!"
           EOF
