@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import api from '@/services/api'
 
 export interface User {
   id: number
@@ -53,13 +53,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Шаг 1: Отправить код на email
   async function sendVerificationCode(email: string) {
-    const response = await axios.post('http://localhost:8080/api/auth/send-code', { email })
+    const response = await api.post('/auth/send-code', { email })
     return response.data
   }
 
   // Шаг 2: Проверить код
   async function checkVerificationCode(email: string, code: string) {
-    const response = await axios.post('http://localhost:8080/api/auth/check-code', {
+    const response = await api.post('/auth/check-code', {
       email,
       code
     })
@@ -73,8 +73,8 @@ export const useAuthStore = defineStore('auth', () => {
     username: string
     password: string
   }) {
-    const response = await axios.post<AuthResponse>(
-      'http://localhost:8080/api/auth/complete-registration',
+    const response = await api.post<AuthResponse>(
+      '/auth/complete-registration',
       data
     )
     setAuth(response.data)
@@ -87,14 +87,14 @@ export const useAuthStore = defineStore('auth', () => {
     email: string
     password: string
   }) {
-    const response = await axios.post('http://localhost:8080/api/auth/register', data)
+    const response = await api.post('/auth/register', data)
     return response.data
   }
 
   // Старый метод верификации (для совместимости)
   async function verify(email: string, code: string) {
-    const response = await axios.post<AuthResponse>(
-      'http://localhost:8080/api/auth/verify',
+    const response = await api.post<AuthResponse>(
+      '/auth/verify',
       { email, code }
     )
     setAuth(response.data)
@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(email: string, password: string) {
-    const response = await axios.post<AuthResponse>('http://localhost:8080/api/auth/login', {
+    const response = await api.post<AuthResponse>('/auth/login', {
       email,
       password
     })
