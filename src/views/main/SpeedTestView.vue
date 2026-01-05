@@ -207,9 +207,9 @@ const measurePing = async (): Promise<number> => {
   pings.sort((a, b) => a - b)
   // Remove top and bottom 20%
   const trimmed = pings.slice(Math.floor(pings.length * 0.2), Math.floor(pings.length * 0.8))
-  if (trimmed.length === 0) return Math.round(pings[Math.floor(pings.length / 2)])
+  if (trimmed.length === 0) return Math.round(pings[Math.floor(pings.length / 2)] ?? 30)
 
-  return Math.round(trimmed[Math.floor(trimmed.length / 2)])
+  return Math.round(trimmed[Math.floor(trimmed.length / 2)] ?? 30)
 }
 
 const measureDownloadSpeed = async (): Promise<number> => {
@@ -283,6 +283,7 @@ const measureDownloadSpeed = async (): Promise<number> => {
   let configIndex = 0
   while (performance.now() - startTime < testDuration && configIndex < testConfigs.length * 2) {
     const config = testConfigs[Math.min(configIndex, testConfigs.length - 1)]
+    if (!config) break
 
     const speed = await runParallelDownloads(config.size, config.connections)
 
@@ -310,11 +311,17 @@ const measureDownloadSpeed = async (): Promise<number> => {
     speedSamples.sort((a, b) => a - b)
     // Use 75th percentile - represents peak stable speed
     const idx = Math.floor(speedSamples.length * 0.75)
-    return Math.round(speedSamples[idx] * 10) / 10
+    const sample = speedSamples[idx]
+    if (sample !== undefined) {
+      return Math.round(sample * 10) / 10
+    }
   }
 
   if (speedSamples.length > 0) {
-    return Math.round(speedSamples[speedSamples.length - 1] * 10) / 10
+    const lastSample = speedSamples[speedSamples.length - 1]
+    if (lastSample !== undefined) {
+      return Math.round(lastSample * 10) / 10
+    }
   }
 
   return 0
@@ -626,7 +633,7 @@ onUnmounted(() => {
                 :severity="userLocation ? 'success' : 'secondary'"
                 :disabled="isGettingLocation"
                 size="small"
-                @click="getUserLocation"
+                @click="() => getUserLocation()"
               />
             </div>
 
